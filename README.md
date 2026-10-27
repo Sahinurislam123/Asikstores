@@ -23,3 +23,10 @@ Keep `payment-qr.jpg`, `manifest.json`, `firestore.rules` and `storage.rules` fr
 - Commit the changes and wait for GitHub Pages to deploy, then refresh the site.
 - Product descriptions are stored in Firestore as `description`.
 - UPI QR payments still require manual confirmation in your bank account before confirming an order. A customer-entered UTR is not proof of payment.
+
+
+## UPI Intent payment
+- Checkout can create a pending order and open a generic `upi://pay` link using the supplied UPI ID `6295979909@sbi`. Verify this UPI ID and payee name in your SBI/UPI app before live use.
+- The UPI app may or may not open from every browser. A QR fallback is shown.
+- This is **not automatic payment verification**. Orders remain pending until the merchant checks the bank transaction. Never mark an order paid based only on returning to the website or a customer-supplied screenshot/UTR.
+- Publish the updated `firestore.rules` if you use `upi_intent`; it allows signed-in customers to create pending COD or UPI-intent orders.
