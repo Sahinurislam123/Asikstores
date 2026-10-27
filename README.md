@@ -79,3 +79,8 @@ The current UI deliberately tells users online payment is not active and require
 
 ## Admin design controls (updated)
 After signing in as the configured admin, open Admin Panel to update store name, tagline, logo URL, hero headline/description/button, hero banner image URL, footer/about copy, delivery text, product data, product image URLs, upload product images, and edit/delete products. Store-wide settings are saved in `storeSettings/main`. Publish the updated `firestore.rules` so public users can read settings and only admins can edit them. Image URLs must be publicly accessible HTTPS URLs. Online payment is not enabled until a trusted payment backend is integrated.
+
+
+## UPI QR payment (manual verification)
+
+The checkout includes `payment-qr.jpg`. Customers can scan it, pay the order amount, and enter the UTR/transaction reference. Orders are saved with `paymentMethod: upi_qr` and `paymentStatus: pending_verification`; an admin must verify payment manually before confirming. This is **not** an automatic payment gateway and the entered UTR is not independently verified. Keep the QR image in the repository root so the relative image path works on GitHub Pages. Publish the updated `firestore.rules` before testing UPI orders.
