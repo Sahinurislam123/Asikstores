@@ -59,7 +59,7 @@ function applySettings(data={}) {
   const localDesc=document.querySelector('.local-banner p'); if(localDesc) localDesc.textContent=storeSettings.contactText;
   const trust=document.querySelector('.trust-row small'); if(trust) trust.textContent=storeSettings.deliveryText;
 }
-async function loadStoreSettings(){ if(!configReady) { applySettings({}); initHeroSlider(); return; } try { const snap=await getDoc(doc(db,'storeSettings','main')); applySettings(snap.exists()?snap.data():{}); } catch(err) { console.warn('Store settings unavailable',err); applySettings({}); } initHeroSlider(); }
+async function loadStoreSettings(){ if(!configReady) { applySettings({}); renderCategories(); refreshCategorySelects(); initHeroSlider(); return; } try { const snap=await getDoc(doc(db,'storeSettings','main')); applySettings(snap.exists()?snap.data():{}); } catch(err) { console.warn('Store settings unavailable',err); applySettings({}); } renderCategories(); refreshCategorySelects(); initHeroSlider(); }
 let heroSlideIndex = 0, heroSlideTimer = null;
 function initHeroSlider(){
   const hero=document.querySelector('.hero'); if(!hero || hero.dataset.sliderReady==='1') return; hero.dataset.sliderReady='1';
