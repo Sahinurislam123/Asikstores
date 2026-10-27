@@ -1,27 +1,19 @@
-# ASIK STORE — Professional Multi-page Admin
+ASIK STORE — Order Details + Category Images update
 
-## What changed
-- Admin modal now behaves like separate pages: Overview, Website & Branding, Categories, Add Product, Products, Orders.
-- Website & Branding edits store name, tagline, logo URL, hero text/image, footer, delivery and contact copy.
-- Category Manager supports adding categories, editing category names/icons, and deleting unused categories.
-- Categories are saved in Firestore `storeSettings/main` under `categories`.
-- Existing product and order management stays in place.
+Replace these two files in your GitHub repository root:
+- app.js
+- styles.css
 
-## Update on GitHub Pages
-1. Download and extract this ZIP.
-2. Replace `app.js` and `styles.css` in the root of your existing `Asikstores` repository.
-3. Commit changes to the same branch currently used by GitHub Pages (usually `main`).
-4. Wait for Actions to show a green success check, then open the site in Chrome Incognito.
+Do not replace index.html, firestore.rules, storage.rules, or payment-qr.jpg for this update.
 
-## Firestore requirements
-The current `storeSettings/{settingId}` rule must permit Admin create/update. Product create/update/delete and order read/update rules must also permit Admin operations. Do not make rules public just to fix admin access.
+What's changed:
+1. Admin Orders now has a clickable “বিস্তারিত দেখুন” button for each order.
+2. Order details modal displays customer name, phone, email, full address, delivery note, payment method/status, item list, subtotal, delivery fee, total, and map link/coordinates when saved.
+3. Admin can still update order status; “Confirmed / Accept” is available in the status dropdown.
+4. Category creation/editing supports an image URL or direct image upload. Uploads go to Firebase Storage under categories/ and the download URL is stored in storeSettings/main categories.
+5. Category images display in the storefront category buttons when imageUrl is set; otherwise emoji is shown.
 
-Category changes are stored in Firestore. If a category already has products assigned, the admin UI blocks deleting it until those products are moved to another category.
-
-
-## Delivery map picker (added)
-- Checkout customers can tap the map, drag the pin, or use the current-location button (browser permission required).
-- Coordinates are saved in each order as `deliveryLocation: { lat, lng, mapUrl }`.
-- Admin Orders displays a Google Maps link for the selected delivery point.
-- The map uses Leaflet + OpenStreetMap tiles over the internet. If map loading fails, customers can still submit their written address; ask them to select a pin when possible.
-- New orders only: older orders will show “গ্রাহক ম্যাপে লোকেশন দেননি”.
+Notes:
+- Firebase Storage must be enabled and Storage Rules must permit authenticated Admin uploads to categories/.
+- Existing orders without deliveryLocation cannot show a map; only new orders with a selected map location include coordinates.
+- Test in a non-production order first. This package was syntax-checked but not tested against the live Firebase project.
