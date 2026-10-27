@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#137a43" />
+  <meta name="description" content="ASIK STORE — আপনার এলাকার অনলাইন grocery store" />
+  <title>ASIK STORE | Grocery</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="ASIK STORE home"><span class="brand-mark">A</span><span>ASIK <b>STORE</b><small>Fresh groceries, nearby</small></span></a>
+    <div class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="চাল, ডাল, তেল খুঁজুন..." aria-label="পণ্য খুঁজুন" /></div>
+    <div class="header-actions"><button id="loginBtn" class="btn btn-light">Login</button><button id="cartBtn" class="btn btn-cart">🛒 <span>Cart</span> <b id="cartCount">0</b></button></div>
+  </header>
+  <main id="home" class="page-shell">
+    <section class="hero">
+      <div class="hero-copy"><span class="eyebrow">YOUR NEIGHBOURHOOD GROCERY STORE</span><h1>প্রতিদিনের বাজার,<br/><em>এবার ঘরে বসেই।</em></h1><p>চাল, ডাল, তেল থেকে দৈনন্দিন প্রয়োজনীয় সবকিছু—আপনার এলাকার কাছেই।</p><a class="btn btn-primary" href="#products">এখনই কেনাকাটা করুন <span>→</span></a><div class="hero-points"><span>✓ সহজ অর্ডার</span><span>✓ COD সুবিধা</span><span>✓ লোকাল ডেলিভারি</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="basket">🥬🍅🥕<br/>🍌🥛🥖</div><div class="floating-tag">Fresh & local <b>৳ / ₹</b></div></div>
+    </section>
+    <section class="trust-row"><div><span>🚚</span><p><b>Local Delivery</b><small>নিজের এলাকা ও আশেপাশে</small></p></div><div><span>🥦</span><p><b>Daily Essentials</b><small>প্রতিদিনের প্রয়োজনীয় পণ্য</small></p></div><div><span>🔒</span><p><b>Secure Orders</b><small>নিরাপদ অ্যাকাউন্ট ও অর্ডার</small></p></div></section>
+    <section class="section-head"><div><span class="eyebrow">SHOP BY CATEGORY</span><h2>ক্যাটাগরি অনুযায়ী কিনুন</h2></div><span class="muted">আপনার বাজার, এক জায়গায়</span></section>
+    <nav id="categories" class="category-list" aria-label="পণ্যের ক্যাটাগরি"></nav>
+    <section id="products" class="section-head product-heading"><div><span class="eyebrow">GOOD THINGS, EVERY DAY</span><h2 id="productTitle">জনপ্রিয় পণ্য</h2></div><select id="sortSelect" aria-label="পণ্য সাজান"><option value="default">Recommended</option><option value="low">দাম: কম থেকে বেশি</option><option value="high">দাম: বেশি থেকে কম</option></select></section>
+    <div id="notice" class="notice" hidden></div><section id="productGrid" class="product-grid"><div class="loading">পণ্য লোড হচ্ছে...</div></section>
+    <section class="local-banner"><div><span class="eyebrow">MADE FOR YOUR NEIGHBOURHOOD</span><h2>আপনার এলাকার বাজার এখন অনলাইনে</h2><p>ডেলিভারি এলাকা ও চার্জ অর্ডারের আগে নিশ্চিত করুন।</p></div><span class="banner-emoji">🛍️</span></section>
+    <footer><a class="brand footer-brand" href="#home"><span class="brand-mark">A</span><span>ASIK <b>STORE</b><small>Fresh groceries, nearby</small></span></a><p>© <span id="year"></span> ASIK STORE · Local grocery shopping</p><div><a href="#orders" id="ordersLink">My Orders</a><button id="adminLink" class="text-btn" hidden>Admin Panel</button></div></footer>
+  </main>
+  <div id="modalBackdrop" class="modal-backdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="বন্ধ করুন">×</button><div id="modalContent"></div></section></div>
+  <aside id="cartDrawer" class="drawer" aria-label="Shopping cart" aria-hidden="true"><div class="drawer-head"><div><span class="eyebrow">YOUR BAG</span><h2>আপনার কার্ট</h2></div><button id="cartClose" class="icon-btn" aria-label="কার্ট বন্ধ করুন">×</button></div><div id="cartItems" class="cart-items"></div><div class="cart-bottom"><div class="total-line"><span>Subtotal</span><b id="cartSubtotal">₹0</b></div><small>ডেলিভারি চার্জ চেকআউটে নিশ্চিত হবে।</small><button id="checkoutBtn" class="btn btn-primary full">Checkout →</button></div></aside>
+  <div id="drawerShade" class="drawer-shade" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
