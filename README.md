@@ -75,3 +75,7 @@ The current UI deliberately tells users online payment is not active and require
 - `firestore.rules` — database access rules
 - `storage.rules` — image upload access rules
 - `manifest.json` — PWA metadata
+
+
+## Admin design controls (updated)
+After signing in as the configured admin, open Admin Panel to update store name, tagline, logo URL, hero headline/description/button, hero banner image URL, footer/about copy, delivery text, product data, product image URLs, upload product images, and edit/delete products. Store-wide settings are saved in `storeSettings/main`. Publish the updated `firestore.rules` so public users can read settings and only admins can edit them. Image URLs must be publicly accessible HTTPS URLs. Online payment is not enabled until a trusted payment backend is integrated.
