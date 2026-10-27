@@ -17,3 +17,11 @@
 The current `storeSettings/{settingId}` rule must permit Admin create/update. Product create/update/delete and order read/update rules must also permit Admin operations. Do not make rules public just to fix admin access.
 
 Category changes are stored in Firestore. If a category already has products assigned, the admin UI blocks deleting it until those products are moved to another category.
+
+
+## Delivery map picker (added)
+- Checkout customers can tap the map, drag the pin, or use the current-location button (browser permission required).
+- Coordinates are saved in each order as `deliveryLocation: { lat, lng, mapUrl }`.
+- Admin Orders displays a Google Maps link for the selected delivery point.
+- The map uses Leaflet + OpenStreetMap tiles over the internet. If map loading fails, customers can still submit their written address; ask them to select a pin when possible.
+- New orders only: older orders will show “গ্রাহক ম্যাপে লোকেশন দেননি”.
