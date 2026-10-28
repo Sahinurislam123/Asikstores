@@ -107,8 +107,8 @@ function applySettings(data={}) {
   const desc=document.querySelector('.hero-copy p'); if(desc) desc.textContent=storeSettings.heroDescription;
   const cta=document.querySelector('.hero-copy .btn'); if(cta) cta.innerHTML=`${escapeHtml(storeSettings.heroButton)} <span>→</span>`;
   if(hero && storeSettings.heroImageUrl) { const art=hero.querySelector('.hero-art'); if(art) art.style.background=`center/cover no-repeat url("${storeSettings.heroImageUrl.replace(/["\\]/g,'')}")`; }
-  const foot=document.querySelector('footer p'); if(foot) foot.innerHTML=`© <span id="year">${new Date().getFullYear()}</span> ${escapeHtml(storeSettings.footerText)}`;
-  const by=document.getElementById('designBy'); if(by) by.textContent='Design by - Sahinur Islam';
+  const foot=document.querySelector('footer p'); if(foot){ const yearEl=document.getElementById('year'); if(yearEl) yearEl.textContent=String(new Date().getFullYear()); const textNode=Array.from(foot.childNodes).find(n=>n.nodeType===Node.TEXT_NODE && n.textContent.includes('ASIK STORE')); if(textNode) textNode.textContent=' '+storeSettings.footerText+' '; }
+  const by=document.getElementById('designByPersistent'); if(by){by.textContent='Design by - Sahinur Islam';by.href='https://www.instagram.com/sksahinur.islam/';}
   const localTitle=document.querySelector('.local-banner h2'); if(localTitle) localTitle.textContent=storeSettings.footerAbout;
   const localDesc=document.querySelector('.local-banner p'); if(localDesc) localDesc.textContent=storeSettings.contactText;
   const trust=document.querySelector('.trust-row small'); if(trust) trust.textContent=storeSettings.deliveryText;
@@ -393,15 +393,25 @@ if(!configReady){ /* Header login button removed; auth entry remains in the 3-do
 else onAuthStateChanged(auth,async user=>{currentUser=user; const menuLogin=$('menuLogin'); if(menuLogin) menuLogin.textContent=user?'Logout':'Login'; await checkAdmin(user);});
 async function initVisitorCounter(){
  const el=document.getElementById('visitorCount'); if(!el)return;
- if(!configReady){el.textContent='—';return}
+ // Show a persistent local fallback immediately; Firestore will replace it with the global total when permitted.
+ let localCount=Number(localStorage.getItem('asik_local_visitor_count')||0);
+ if(!sessionStorage.getItem('asik_visit_counted')){
+   localCount+=1; localStorage.setItem('asik_local_visitor_count',String(localCount));
+   sessionStorage.setItem('asik_visit_counted','1');
+ }
+ el.textContent=localCount.toLocaleString('en-IN');
+ if(!configReady)return;
  const refDoc=doc(db,'visitorStats','siteTotal');
  try{
-   if(!sessionStorage.getItem('asik_visit_counted')){
-     try{await setDoc(refDoc,{count:increment(1),updatedAt:serverTimestamp()},{merge:true});sessionStorage.setItem('asik_visit_counted','1')}catch(e){console.warn('Visitor count write blocked; showing available total only',e)}
+   if(!sessionStorage.getItem('asik_global_visit_counted')){
+     await setDoc(refDoc,{count:increment(1),updatedAt:serverTimestamp()},{merge:true});
+     sessionStorage.setItem('asik_global_visit_counted','1');
    }
-   const snap=await getDoc(refDoc);el.textContent=snap.exists()?Number(snap.data().count||0).toLocaleString('en-IN'):'0';
- }catch(e){el.textContent='—';console.warn('Visitor counter unavailable',e)}
+   const snap=await getDoc(refDoc);
+   if(snap.exists()) el.textContent=Number(snap.data().count||0).toLocaleString('en-IN');
+ }catch(e){console.warn('Global visitor counter unavailable; displaying this browser's local count until Firestore rules are published.',e)}
 }
+
 loadStoreSettings();
 initVisitorCounter();
 loadProducts();
