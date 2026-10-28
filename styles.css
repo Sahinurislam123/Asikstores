@@ -300,3 +300,5 @@ body:has(.drawer.open) .sticky-cart-bar{display:none!important}
 /* Footer attribution and visitor counter */
 #designBy,.visitor-counter{display:inline-block;margin-top:5px;font-size:.82rem;color:var(--muted,#718078)}
 .visitor-counter b{color:var(--green,#187846);font-variant-numeric:tabular-nums}
+
+.design-credit{display:inline-block;color:var(--green-dark);font-weight:700;text-decoration:none;cursor:pointer}.design-credit:hover{text-decoration:underline}
