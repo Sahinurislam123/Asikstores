@@ -1,19 +1,20 @@
-ASIK STORE — FINAL ORDER CONFIRM FLOW
+ASIK STORE: Admin Order Bill / Vendor Checklist / WhatsApp
 
-Upload/replace these files in your GitHub repository root:
+Upload/replace these files in your GitHub Pages repository:
 - app.js
-- index.html (included for matching version; replace only if you want the same current header/search layout)
 - styles.css
-- firestore.rules (do not publish blindly; compare with your current rules first)
+
+Keep these existing assets/folders as they are:
+- index.html
 - payment-qr.jpg
 - fonts/Nirlipta-Regular.ttf
 - fonts/Photograph-Signature.ttf
+- firestore.rules (do not replace without comparing with your live rules)
 
-New behavior:
-1. User fills delivery details and sees bill preview.
-2. No Firestore order is created at this stage; products remain in cart.
-3. Only when user clicks “চূড়ান্ত অর্ডার কনফার্ম করুন” is the order created and sent to Admin.
-4. Cart is cleared only after Firestore confirms order creation.
-5. If creating the order fails, cart remains and error is shown.
+Features added in Admin > Orders > Complete details:
+- Download order bill as HTML; open it and use browser Print > Save as PDF if you need a PDF.
+- WhatsApp button opens WhatsApp with order/bill text prefilled; admin manually sends it.
+- Shopkeeper product checklist; each checked item is saved to Firestore in vendorCheckedItems.
 
-Test on a staging/test order before using in production. UPI payment status is not verified automatically.
+Requires Admin Firestore permissions for updating orders (existing admin update rule should allow this).
+After committing, test with a real test order before using for customers.
