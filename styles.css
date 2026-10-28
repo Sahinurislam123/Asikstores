@@ -224,3 +224,14 @@
 .product-variant-select{width:100%;min-width:0;padding:8px;border:1px solid #d9e5dc;border-radius:10px;background:#fff;color:#183b28;font:inherit;font-size:.9rem}
 .product-info .product-bottom{align-items:center}
 .edit-product-form textarea[name="variants"]{min-height:90px}
+
+/* Clear quantity option editor: separate option and price fields */
+.variant-admin-section{border:1px solid var(--line,#dce7de);border-radius:14px;padding:14px;margin:14px 0;background:#fbfdfb;display:flex;flex-direction:column;gap:9px}
+.variant-admin-section>b{font-size:1rem}
+.variant-admin-section>small{color:var(--muted,#68766d)}
+.variant-admin-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.65fr) 34px;gap:8px;margin:8px 0;align-items:center}
+.variant-admin-row input{min-width:0;width:100%;box-sizing:border-box}
+.variant-admin-row .variant-remove-btn{height:42px;border:0;border-radius:10px;background:#fff0f0;color:#b42318;font-size:24px}
+#pVariantRows .variant-admin-row .variant-remove-btn{display:none}
+.variant-admin-section .small-btn{align-self:flex-start}
+@media(max-width:480px){.variant-admin-row{grid-template-columns:minmax(0,1fr) minmax(80px,.6fr) 30px;gap:5px}}

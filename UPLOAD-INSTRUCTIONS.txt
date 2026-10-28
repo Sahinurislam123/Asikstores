@@ -1,7 +1,11 @@
-ASIK STORE simpler product quantity options
+ASIK STORE variant selector and separate price fields
 
-Upload app.js from this ZIP to the repository root, replacing the existing app.js. Keep index.html and styles.css unchanged; other files are included for reference only.
+Upload app.js and styles.css from this ZIP to the repository root, replacing the same-named files. Keep your current index.html, firestore.rules, payment-qr.jpg, and fonts unchanged.
 
-Admin product add/edit now uses one simple field:
-250 গ্রাম=২৫, ৫০০ গ্রাম=৫০, ১ কেজি=১০০
-Separate options with commas. Bengali and English digits are supported. This also fixes Bengali digits not being parsed correctly.
+Admin Add Product/Edit Product now has separate inputs for each quantity option and its price, plus an "Add another option" button. Example:
+Option name: ২৫০ গ্রাম
+Price: ২৫
+Add another row for ৫০০ গ্রাম and ₹50, or ১ কেজি and ₹100.
+Users will choose from the saved options on the product card.
+
+JavaScript syntax checked; test one sample product after publishing.
