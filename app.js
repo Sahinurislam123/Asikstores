@@ -409,7 +409,7 @@ async function initVisitorCounter(){
    }
    const snap=await getDoc(refDoc);
    if(snap.exists()) el.textContent=Number(snap.data().count||0).toLocaleString('en-IN');
- }catch(e){console.warn("Global visitor counter unavailable; displaying this browser's local count until Firestore rules are published.",e)}
+ }catch(e){console.warn('Global visitor counter unavailable; displaying this browser's local count until Firestore rules are published.',e)}
 }
 
 loadStoreSettings();
