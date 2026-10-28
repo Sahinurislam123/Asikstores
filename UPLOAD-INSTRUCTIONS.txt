@@ -1,15 +1,23 @@
-ASIK STORE — Expandable Admin Product List
+ASIK STORE — Footer, Visitor Counter, COD/UPI toggles
 
-What changed:
-- Admin > Products now shows compact product cards similar to the Orders list.
-- Tap a product card to expand its details and edit form in the same card.
-- Product thumbnail, category, stock, price, active/inactive status appear in the compact row.
-- Existing variant price/quantity editing, image URL/upload, description, stock, active toggle, save and delete remain available.
-- Existing customer-facing bottom cart bar, product image display, map and other features are preserved from the source package.
+Files to replace in the GitHub repository:
+- index.html
+- app.js
+- styles.css
 
-Upload to GitHub Pages:
-1. Replace index.html, app.js and styles.css in the Asikstores repository.
-2. Keep firestore.rules, payment-qr.jpg and fonts/ unchanged if already present.
-3. Commit changes, wait for GitHub Pages deployment, then refresh the site.
+Important: Firebase Firestore Rules also need updating:
+- Open Firebase Console > Firestore Database > Rules
+- Replace the rules with the included firestore.rules content and Publish.
+- Keep the existing users/{uid}.role == 'admin' setup. Do not make the whole database public.
 
-Note: Live Firebase deployment was not testable from this package. Test editing one product and one variant after upload.
+Changes:
+1. Footer shows “Design by - Sahinur Islam” and website visitor count.
+2. Visitor count increments once per browser session using Firestore visitorStats/siteTotal.
+3. Admin > Website & Branding has checkboxes to enable/disable COD and UPI. Save the settings.
+4. Disabled payment methods are hidden from checkout.
+5. UPI intent order status is allowed as pending_verification in Firestore rules.
+
+Notes:
+- Visitor counter counts browser sessions, not unique people, and can be affected by blocked Firestore writes.
+- Both payment methods default to enabled if the settings have not been saved yet.
+- Preserve the other files and features. The site has not been tested against your live Firebase project from this environment.

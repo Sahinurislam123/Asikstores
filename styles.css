@@ -295,3 +295,8 @@ body:has(.drawer.open) .sticky-cart-bar{display:none!important}
 .admin-product-actions{align-items:center}
 .admin-product-actions .danger{color:#b42318;border-color:#f0c9c6}
 @media(max-width:420px){.admin-product-summary{padding:10px;gap:9px}.admin-product-thumb{width:46px;height:46px;flex-basis:46px}.admin-product-summary-main strong{font-size:13px}.admin-product-summary-side .pill{font-size:9px;padding:4px 6px}}
+
+
+/* Footer attribution and visitor counter */
+#designBy,.visitor-counter{display:inline-block;margin-top:5px;font-size:.82rem;color:var(--muted,#718078)}
+.visitor-counter b{color:var(--green,#187846);font-variant-numeric:tabular-nums}
