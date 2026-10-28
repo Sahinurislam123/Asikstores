@@ -1,17 +1,7 @@
-ASIK STORE Chrome compatibility + selected variant fix
+ASIK STORE visual/cart fix
 
-Replace these repository files with the ZIP versions:
-- index.html
-- app.js
-- styles.css
+Upload index.html, app.js, and styles.css from this ZIP to repository root, replacing same-named files. Keep Firestore rules and payment settings unchanged unless you intend to update them separately.
 
-Keep firestore.rules, payment-qr.jpg and fonts unchanged.
+Fixes: product images smaller and contained, prices aligned on the left and not clipped by Add button, sticky bottom cart summary restored and updates amount/item count; tapping it opens cart bottom sheet.
 
-Changes:
-- Avoids CSS.escape-dependent selectors for product variant selection.
-- Adds cache-busting query versions to app.js and styles.css so Chrome is less likely to use stale assets.
-- Selecting 250 gm ₹20 then Add should add that variant and price; selecting 500 gm ₹40 should add that variant and price.
-- Bottom cart bar updates based on cart contents and opens the cart when clicked.
-
-After commit, in Chrome open the site and do a hard refresh. On Android Chrome: site menu > Settings > Site settings > Storage (or All sites > select site > Clear & reset) if stale content persists. This clears only this site's stored data and may clear its cart/login.
-If Chrome still fails but Brave works, capture the exact Chrome error or screenshot; do not clear all browser data.
+JavaScript syntax checked with node --check; test on live GitHub Pages after commit.

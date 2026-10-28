@@ -259,10 +259,3 @@
 .sticky-cart-proceed span{margin-left:4px}
 @media(max-width:600px){.product-photo{height:96px}.product-info{padding:8px}.product-info h3{font-size:13px}.product-bottom .price{font-size:15px}.product-bottom .add-btn{padding:6px 8px;font-size:12px}.drawer{top:auto;right:0;left:0;bottom:0;width:100%;height:min(78dvh,760px);max-height:85dvh;border-radius:22px 22px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(110%);box-shadow:0 -15px 55px #10231930}.drawer.open{transform:translateY(0)}.sticky-cart-bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));padding:8px 9px}.sticky-cart-thumb{width:38px;height:38px;flex-basis:38px}.sticky-cart-proceed{padding:12px 12px;min-width:100px}}
 body:has(.sticky-cart-bar:not([hidden])){padding-bottom:88px}
-
-/* Selected variant price + live Amazon-style bottom cart summary */
-.product-variant-select{display:block;width:100%;min-width:0}
-.product-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.product-bottom>div{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
-.product-bottom .price{white-space:nowrap}
-.sticky-cart-bar{z-index:1000}
