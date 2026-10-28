@@ -19,6 +19,47 @@ let app, auth, db, storage;
 if (configReady) { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); storage = getStorage(app); }
 
 const $ = id => document.getElementById(id);
+// Resilient delivery-map loader (Leaflet was previously referenced without being loaded).
+let deliveryMapInstance = null;
+let deliveryMapMarker = null;
+let leafletLoadPromise = null;
+function loadLeaflet(){
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletLoadPromise) return leafletLoadPromise;
+  leafletLoadPromise = new Promise((resolve, reject) => {
+    const cssSources = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+    ];
+    if (!document.querySelector('link[data-leaflet-css]')) {
+      const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = cssSources[0]; link.dataset.leafletCss = '1';
+      link.onerror = () => { link.href = cssSources[1]; };
+      document.head.appendChild(link);
+    }
+    const jsSources = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js',
+      'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'
+    ];
+    let i = 0;
+    const next = () => {
+      if (window.L) { resolve(window.L); return; }
+      if (i >= jsSources.length) { leafletLoadPromise = null; reject(new Error('Map library could not load')); return; }
+      const script = document.createElement('script'); script.src = jsSources[i++]; script.async = true;
+      script.onload = () => window.L ? resolve(window.L) : next();
+      script.onerror = () => { script.remove(); next(); };
+      document.head.appendChild(script);
+    };
+    next();
+  });
+  return leafletLoadPromise;
+}
+function setDeliveryLocation(lat,lng){
+  const latEl=$('deliveryLat'), lngEl=$('deliveryLng'), status=$('locationStatus');
+  if(latEl) latEl.value=String(lat); if(lngEl) lngEl.value=String(lng);
+  if(deliveryMapMarker && deliveryMapInstance){deliveryMapMarker.setLatLng([lat,lng]);deliveryMapInstance.setView([lat,lng],Math.max(deliveryMapInstance.getZoom(),15));}
+  if(status) status.textContent=`লোকেশন নির্বাচিত হয়েছে: ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
+}
 let categories = [
   {name:'সব পণ্য',emoji:'🛍️'}, {name:'চাল ও আটা',emoji:'🌾'}, {name:'ডাল',emoji:'🫘'}, {name:'তেল ও মশলা',emoji:'🫙'}, {name:'বিস্কুট ও স্ন্যাকস',emoji:'🍪'}, {name:'দুধ ও পানীয়',emoji:'🥛'}, {name:'ফল ও সবজি',emoji:'🥦'}
 ];
@@ -108,11 +149,11 @@ function showProductDetails(id){const p=findProduct(id);if(!p)return;openModal(`
 function findProduct(id){return products.find(p=>p.id===id)||cartProductCache[id]||null}
 function addToCart(id){const p=findProduct(id);if(!p)return;cartProductCache[id]={id:p.id,name:p.name,category:p.category||'',unit:p.unit||'',price:Number(p.price)||0,oldPrice:Number(p.oldPrice)||0,emoji:p.emoji||'🛒',imageUrl:p.imageUrl||'',description:p.description||'',stock:p.stock,active:p.active!==false};cart[id]=(Number(cart[id])||0)+1;saveCart();showCartToast(`${p.name} কার্টে যোগ হয়েছে`)}
 function showCartToast(message){let toast=document.getElementById('cartAddToast');if(!toast){toast=document.createElement('div');toast.id='cartAddToast';toast.className='cart-add-toast';toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');document.body.appendChild(toast)}toast.textContent='✓ '+message;toast.classList.add('visible');clearTimeout(window.__asikCartToastTimer);window.__asikCartToastTimer=setTimeout(()=>toast.classList.remove('visible'),2200)}
-function renderCartCount(){$('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
+function renderCartCount(){const count=Object.values(cart).reduce((a,b)=>a+b,0);const badge=$('cartCount');if(badge)badge.textContent=count;const bar=$('stickyCartBar');if(bar){const open=$('cartDrawer')?.classList.contains('open');bar.hidden=count<=0||open;bar.style.display=(count<=0||open)?'none':'';const lines=cartLines();const total=lines.reduce((sum,x)=>sum+x.p.price*x.qty,0);const amount=$('stickyCartAmount'),items=$('stickyCartItemsCount'),thumb=$('stickyCartThumb');if(amount)amount.textContent=money(total);if(items)items.textContent=count;if(thumb){const first=lines[0]?.p;thumb.innerHTML=first?.imageUrl?`<img src="${escapeHtml(first.imageUrl)}" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none'">`:escapeHtml(first?.emoji||'🛒')}}}
 function cartLines(){return Object.entries(cart).map(([id,qty])=>({p:cartProductCache[id]||findProduct(id.split('::')[0]),qty:Number(qty)||0,id})).filter(x=>x.p&&x.qty>0)}
 function renderCart(){const lines=cartLines();$('cartItems').innerHTML=lines.length?lines.map(({p,qty,id})=>`<div class="cart-item"><div class="cart-emoji">${p.imageUrl?`<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.textContent='🛒'">`:escapeHtml(p.emoji||'🛒')}</div><div><h4>${escapeHtml(p.name)}</h4><small>${money(p.price)} · ${escapeHtml(p.unit||'')}</small><div class="qty"><button data-qty="${escapeHtml(id)}" data-delta="-1">−</button><b>${qty}</b><button data-qty="${escapeHtml(id)}" data-delta="1">＋</button></div></div><b>${money(p.price*qty)}</b></div>`).join(''):'<div class="empty">আপনার কার্ট খালি। পণ্য যোগ করুন।</div>';const subtotal=lines.reduce((s,x)=>s+x.p.price*x.qty,0);$('cartSubtotal').textContent=money(subtotal);$('checkoutBtn').disabled=!lines.length;$('cartItems').querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{const id=b.dataset.qty;cart[id]=(Number(cart[id])||0)+Number(b.dataset.delta);if(cart[id]<=0){delete cart[id];delete cartProductCache[id]}else{const p=findProduct(id);if(p)cartProductCache[id]={...p}}saveCart()});}
-function openCart(){$('cartDrawer').classList.add('open');$('cartDrawer').setAttribute('aria-hidden','false');$('drawerShade').hidden=false}
-function closeCart(){$('cartDrawer').classList.remove('open');$('cartDrawer').setAttribute('aria-hidden','true');$('drawerShade').hidden=true}
+function openCart(){$('cartDrawer').classList.add('open');$('cartDrawer').setAttribute('aria-hidden','false');$('drawerShade').hidden=false;const bar=$('stickyCartBar');if(bar){bar.hidden=true;bar.style.display='none'}}
+function closeCart(){$('cartDrawer').classList.remove('open');$('cartDrawer').setAttribute('aria-hidden','true');$('drawerShade').hidden=true;const bar=$('stickyCartBar');if(bar){bar.style.display='';bar.hidden=Object.values(cart).reduce((a,b)=>a+b,0)<=0}renderCartCount()}
 function openModal(html){$('modalContent').innerHTML=html;$('modalBackdrop').hidden=false}
 function closeModal(){$('modalBackdrop').hidden=true;$('modalContent').innerHTML=''}
 function authForm(){openModal(`<span class="eyebrow">WELCOME TO ASIK STORE</span><h2 id="modalTitle">আপনার অ্যাকাউন্ট</h2><p>অর্ডার করতে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p><form id="authForm" class="form-stack"><label>ইমেইল<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>পাসওয়ার্ড<input id="authPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="কমপক্ষে ৬ অক্ষর"></label><div class="form-row"><button class="btn btn-primary" type="submit" name="mode" value="login">Login</button><button class="btn btn-light" type="submit" name="mode" value="signup">Sign up</button></div><div id="authError" class="error-text" aria-live="polite"></div></form><div class="divider-text">অথবা</div><button id="googleLogin" class="btn btn-google">G &nbsp; Continue with Google</button>`);$('authForm').onsubmit=async e=>{e.preventDefault();const mode=e.submitter?.value||'login',email=$('authEmail').value.trim(),password=$('authPassword').value;try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');if(mode==='signup'){const cred=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(cred.user,{displayName:email.split('@')[0]});await setDoc(doc(db,'users',cred.user.uid),{email,displayName:cred.user.displayName||'',createdAt:serverTimestamp()},{merge:true});}else await signInWithEmailAndPassword(auth,email,password);closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};$('googleLogin').onclick=async()=>{try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');await signInWithPopup(auth,new GoogleAuthProvider());closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};}
@@ -131,7 +172,7 @@ function checkoutForm(){
  <label class="payment-option"><input type="radio" name="payment" value="cod" checked> <span><b>Cash on Delivery</b><br><small>পণ্য পাওয়ার সময় পেমেন্ট</small></span></label>
  <label class="payment-option"><input type="radio" name="payment" value="upi_intent"> <span><b>Pay by any UPI App</b><br><small>অর্ডার কনফার্ম করার পর UPI অ্যাপ খুলতে পারবেন</small></span></label>
  <div class="warning">পণ্যের মোট: <b>${money(subtotal)}</b><br>ডেলিভারি চার্জ পরে নিশ্চিত করা হবে।</div><div id="checkoutError" class="error-text" aria-live="polite"></div><button class="btn btn-primary full" type="submit">বিল দেখুন · চূড়ান্ত কনফার্মের আগে</button></form>`);
- initDeliveryMap();
+ setTimeout(()=>initDeliveryMap(),300);
  $('checkoutForm').onsubmit=async e=>{
   e.preventDefault();const err=$('checkoutError');
   if(!configReady){err.textContent='Firebase config সেট করা হয়নি।';return}
@@ -279,14 +320,49 @@ async function loadAdminOrders(){
   });
  }catch(e){el.innerHTML=`<p class="error-text">${escapeHtml(friendlyError(e))}</p>`}
 }
-async function initDeliveryMap(){try{await loadLeaflet();if(!$('deliveryMap'))return;deliveryMapInstance=window.L.map('deliveryMap').setView([23.5,87.3],8);window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(deliveryMapInstance);deliveryMapMarker=window.L.marker([23.5,87.3],{draggable:true}).addTo(deliveryMapInstance);deliveryMapMarker.bindPopup('মার্কার টেনে সঠিক ডেলিভারি লোকেশন বেছে নিন');deliveryMapInstance.on('click',e=>setDeliveryLocation(e.latlng.lat,e.latlng.lng));deliveryMapMarker.on('dragend',()=>{const p=deliveryMapMarker.getLatLng();setDeliveryLocation(p.lat,p.lng)});$('useMyLocation').onclick=()=>{if(!navigator.geolocation){$('locationStatus').textContent='এই ব্রাউজারে লোকেশন সাপোর্ট নেই। ম্যাপে ট্যাপ করুন।';return}$('locationStatus').textContent='আপনার অনুমতি নিয়ে লোকেশন খোঁজা হচ্ছে…';navigator.geolocation.getCurrentPosition(pos=>{setDeliveryLocation(pos.coords.latitude,pos.coords.longitude);deliveryMapMarker.openPopup()},()=>{$('locationStatus').textContent='লোকেশন পাওয়া যায়নি। ম্যাপে ট্যাপ করে বেছে নিন।'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})};setTimeout(()=>deliveryMapInstance.invalidateSize(),250)}catch(e){if($('locationStatus'))$('locationStatus').textContent='ম্যাপ লোড হয়নি। পরে আবার চেষ্টা করুন বা সাপোর্টে জানান।';console.warn(e)}}
+async function initDeliveryMap(){
+  const mapEl=$('deliveryMap');
+  if(!mapEl) return;
+  const status=$('locationStatus');
+  if(status) status.textContent='ম্যাপ লোড হচ্ছে…';
+  try {
+    await loadLeaflet();
+    if(!document.getElementById('deliveryMap')) return;
+    if(deliveryMapInstance){deliveryMapInstance.remove();deliveryMapInstance=null;deliveryMapMarker=null;}
+    deliveryMapInstance=window.L.map('deliveryMap',{tap:true}).setView([23.5204,87.3119],12);
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19, attribution:'&copy; OpenStreetMap contributors',
+      crossOrigin:true
+    }).addTo(deliveryMapInstance);
+    deliveryMapMarker=window.L.marker([23.5204,87.3119],{draggable:true}).addTo(deliveryMapInstance);
+    deliveryMapMarker.bindPopup('মার্কার টেনে আপনার ডেলিভারি লোকেশন বেছে নিন');
+    deliveryMapInstance.on('click',e=>setDeliveryLocation(e.latlng.lat,e.latlng.lng));
+    deliveryMapMarker.on('dragend',()=>{const point=deliveryMapMarker.getLatLng();setDeliveryLocation(point.lat,point.lng)});
+    const locate=$('useMyLocation');
+    if(locate) locate.onclick=()=>{
+      if(!navigator.geolocation){if(status)status.textContent='লোকেশন সাপোর্ট নেই। ম্যাপে ট্যাপ করে লোকেশন বেছে নিন।';return;}
+      if(status)status.textContent='আপনার অনুমতি নিয়ে লোকেশন খোঁজা হচ্ছে…';
+      navigator.geolocation.getCurrentPosition(pos=>{setDeliveryLocation(pos.coords.latitude,pos.coords.longitude);if(deliveryMapMarker)deliveryMapMarker.openPopup();},()=>{if(status)status.textContent='বর্তমান লোকেশন পাওয়া যায়নি। ম্যাপে ট্যাপ করে বেছে নিন।';},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+    };
+    requestAnimationFrame(()=>{if(deliveryMapInstance)deliveryMapInstance.invalidateSize(true);});
+    setTimeout(()=>{if(deliveryMapInstance)deliveryMapInstance.invalidateSize(true);},500);
+    if(status)status.textContent='ম্যাপে ট্যাপ করুন অথবা মার্কার টেনে লোকেশন বেছে নিন।';
+    setTimeout(()=>{if(deliveryMapInstance)deliveryMapInstance.invalidateSize(true)},900);
+  } catch(e) {
+    console.warn('Delivery map failed to load:',e);
+    if(status)status.textContent='ম্যাপ লোড হচ্ছে না। ইন্টারনেট চালু রেখে আবার চেষ্টা করুন; ঠিকানা লিখেও অর্ডার করতে পারবেন।';
+    const map=$('deliveryMap');
+    if(map) map.innerHTML='<div style="padding:18px;text-align:center;color:#52675a;font-size:13px">ম্যাপ লোড করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।<br><button type="button" id="retryDeliveryMap" class="btn btn-light" style="margin-top:10px">ম্যাপ আবার চালু করুন</button></div>';
+    const retry=$('retryDeliveryMap'); if(retry) retry.onclick=()=>{leafletLoadPromise=null;initDeliveryMap()};
+  }
+}
 
 async function showOrders(){if(!currentUser){authForm();return}if(!configReady){showNotice('Firebase config বসানোর পর আপনার অর্ডার দেখা যাবে।');return}try{const snap=await getDocs(query(collection(db,'orders'),where('userId','==',currentUser.uid),orderBy('createdAt','desc')));const own=snap.docs;openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">আমার অর্ডার</h2>${own.length?own.map(d=>{const o=d.data();return `<div class="admin-section"><b>${money(o.subtotal)} · <span class="pill">${escapeHtml(o.status||'pending')}</span></b><p>${escapeHtml((o.items||[]).map(i=>`${i.name} × ${i.quantity}`).join(', '))}</p><small>${escapeHtml(o.address||'')} · ${escapeHtml(o.paymentMethod||'')}</small></div>`}).join(''):'<p>আপনি এখনও কোনো অর্ডার করেননি।</p>'}`)}catch(e){showNotice(friendlyError(e),true)}}
 $('searchToggle').onclick=()=>{const wrap=$('searchWrap');const expanded=wrap.classList.toggle('expanded');$('searchToggle').setAttribute('aria-expanded',String(expanded));if(expanded){$('searchInput').focus()}else{$('searchInput').value='';searchTerm='';renderProducts()}};
 $('menuToggle').onclick=()=>{const menu=$('headerMenu');menu.hidden=!menu.hidden;$('menuToggle').setAttribute('aria-expanded',String(!menu.hidden))};
 document.addEventListener('click',e=>{if(!e.target.closest('.menu-wrap')){$('headerMenu').hidden=true;$('menuToggle').setAttribute('aria-expanded','false')}});
 $('menuProfile').onclick=()=>{ $('headerMenu').hidden=true; if(!currentUser){authForm();return} openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">প্রোফাইল</h2><div class="profile-card"><p><b>নাম:</b> ${escapeHtml(currentUser.displayName||'নাম সেট করা নেই')}</p><p><b>ইমেইল:</b> ${escapeHtml(currentUser.email||'—')}</p><p><b>অ্যাকাউন্ট:</b> ${currentUser.emailVerified?'Verified':'Active'}</p></div><button class="btn btn-light full" id="profileLogoutBtn" type="button">Logout</button>`);$('profileLogoutBtn').onclick=()=>signOut(auth).then(closeModal)};$('menuOrders').onclick=()=>{ $('headerMenu').hidden=true; showOrders()};$('menuAdmin').onclick=()=>{ $('headerMenu').hidden=true; adminPanel()};$('menuLogin').onclick=()=>{ $('headerMenu').hidden=true; if(currentUser)signOut(auth);else authForm()};
-$('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();renderProducts()});$('sortSelect').onchange=e=>{sortMode=e.target.value;renderProducts()};document.addEventListener('click',e=>{if(e.target?.id==='signOutBtn')signOut(auth).then(closeModal)});$('cartBtn').onclick=openCart;$('cartClose').onclick=closeCart;$('drawerShade').onclick=closeCart;$('checkoutBtn').onclick=checkoutForm;$('modalClose').onclick=closeModal;$('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal()});$('adminLink').onclick=adminPanel;$('ordersLink').onclick=e=>{e.preventDefault();showOrders()};$('year').textContent=new Date().getFullYear();renderCategories();renderProducts();renderCartCount();renderCart();
+$('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();renderProducts()});$('sortSelect').onchange=e=>{sortMode=e.target.value;renderProducts()};document.addEventListener('click',e=>{if(e.target?.id==='signOutBtn')signOut(auth).then(closeModal)});$('cartBtn').onclick=openCart;const stickyOpen=$('stickyCartOpen'),stickyProceed=$('stickyCartProceed');if(stickyOpen)stickyOpen.onclick=openCart;if(stickyProceed)stickyProceed.onclick=openCart;$('cartClose').onclick=closeCart;$('drawerShade').onclick=closeCart;$('checkoutBtn').onclick=checkoutForm;$('modalClose').onclick=closeModal;$('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal()});$('adminLink').onclick=adminPanel;$('ordersLink').onclick=e=>{e.preventDefault();showOrders()};$('year').textContent=new Date().getFullYear();renderCategories();renderProducts();renderCartCount();renderCart();
 if(!configReady){ /* Header login button removed; auth entry remains in the 3-dot menu. */ }
 else onAuthStateChanged(auth,async user=>{currentUser=user; const menuLogin=$('menuLogin'); if(menuLogin) menuLogin.textContent=user?'Logout':'Login'; await checkAdmin(user);});
 loadStoreSettings();
