@@ -1,11 +1,7 @@
-ASIK STORE bottom cart bar update
+ASIK STORE simpler product quantity options
 
-Upload index.html, app.js, and styles.css from this ZIP to the repository root, replacing the same-named files. Keep firestore.rules, payment-qr.jpg, and fonts unchanged.
+Upload app.js from this ZIP to the repository root, replacing the existing app.js. Keep index.html and styles.css unchanged; other files are included for reference only.
 
-Behavior:
-- A compact sticky cart summary appears at the bottom when the cart has items.
-- Shows total amount, item count, and first product thumbnail.
-- Tapping the summary or "কার্ট দেখুন" opens the existing cart as a mobile bottom sheet.
-- Existing cart contents and checkout button remain in the sheet.
-
-JavaScript syntax checked with node --check. Please test on the live site after deployment.
+Admin product add/edit now uses one simple field:
+250 গ্রাম=২৫, ৫০০ গ্রাম=৫০, ১ কেজি=১০০
+Separate options with commas. Bengali and English digits are supported. This also fixes Bengali digits not being parsed correctly.
