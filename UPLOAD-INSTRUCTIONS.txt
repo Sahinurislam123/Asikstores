@@ -1,7 +1,7 @@
-ASIK STORE selected quantity/price cart fix
+ASIK STORE Amazon-style sticky cart bar fix
 
-Upload app.js from this ZIP to the root of your GitHub Pages repository, replacing the current app.js. Keep the current index.html, styles.css, firestore.rules, payment-qr.jpg, and fonts unchanged.
+Upload index.html, app.js, and styles.css from this ZIP to your GitHub repository root, replacing the same-named files. Keep your Firebase configuration and Firestore Rules safe; do not replace live Rules blindly.
 
-Fix: when the user selects a quantity option (e.g. 250g = ₹25 or 500g = ₹50) and taps Add, the selected option's label and price are stored as a separate cart line. Cart subtotal and checkout order item use the selected price and quantity option. Different options for the same product remain separate cart lines.
+Fixes: bottom cart bar is shown when cart has items; updates item count and subtotal; shows first item thumbnail; clicking either the preview or yellow button opens the existing cart bottom sheet. Selected quantity variants remain in the cart using the current app.js logic.
 
-JavaScript syntax checked with node --check. Test one product with two options after deployment.
+JavaScript syntax checked. Please test after deployment.
