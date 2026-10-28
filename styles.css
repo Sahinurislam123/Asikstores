@@ -304,7 +304,6 @@ body:has(.drawer.open) .sticky-cart-bar{display:none!important}
 .design-credit{display:inline-block;color:var(--green-dark);font-weight:700;text-decoration:none;cursor:pointer}.design-credit:hover{text-decoration:underline}
 
 /* Persistent Instagram design credit */
-.footer-credit-wrap{display:block;flex-basis:100%;width:100%;text-align:center;padding-top:8px;border-top:1px solid var(--line);}
 footer{flex-wrap:wrap;}
 .footer-credit-wrap .design-credit{display:inline-block;color:var(--green-dark);font-weight:700;text-decoration:none;}
 .footer-credit-wrap .design-credit:hover{text-decoration:underline;}
