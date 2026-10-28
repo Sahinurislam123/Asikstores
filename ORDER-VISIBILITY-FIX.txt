@@ -1,0 +1,9 @@
+ASIK STORE order visibility fix
+
+Main fix: new orders now include createdAt: serverTimestamp(), which is required by the Admin and My Orders queries that sort by createdAt. Firestore orderBy(createdAt) does not return documents without that field.
+
+Also aligned the bundled Firestore create rule with the app's upi_intent paymentStatus=pending_verification value.
+
+Upload the updated cartbehavior/app.js over the repository's app.js.
+Do not publish firestore.rules blindly if your live rules contain other custom permissions. If you choose to update rules, compare with the live rules first.
+Existing older orders that have no createdAt may still be hidden by orderBy(createdAt); new orders should appear after this fix. For older orders, add createdAt to those documents in Firestore or temporarily query without orderBy.
