@@ -385,29 +385,8 @@ async function initDeliveryMap(){
 
 async function showOrders(){if(!currentUser){authForm();return}if(!configReady){showNotice('Firebase config বসানোর পর আপনার অর্ডার দেখা যাবে।');return}try{const snap=await getDocs(query(collection(db,'orders'),where('userId','==',currentUser.uid)));const own=snap.docs.sort((a,b)=>{const av=a.data().createdAt?.toMillis?.()||0,bv=b.data().createdAt?.toMillis?.()||0;return bv-av});openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">আমার অর্ডার</h2>${own.length?own.map(d=>{const o=d.data();return `<div class="admin-section"><b>${money(o.subtotal)} · <span class="pill">${escapeHtml(o.status||'pending')}</span></b><p>${escapeHtml((o.items||[]).map(i=>`${i.name} × ${i.quantity}`).join(', '))}</p><small>${escapeHtml(o.address||'')} · ${escapeHtml(o.paymentMethod||'')}</small></div>`}).join(''):'<p>আপনি এখনও কোনো অর্ডার করেননি।</p>'}`)}catch(e){showNotice(friendlyError(e),true)}}
 $('searchToggle').onclick=()=>{const wrap=$('searchWrap');const expanded=wrap.classList.toggle('expanded');$('searchToggle').setAttribute('aria-expanded',String(expanded));if(expanded){$('searchInput').focus()}else{$('searchInput').value='';searchTerm='';renderProducts()}};
-const headerMenuToggle = $('menuToggle');
-const headerMenuPanel = $('headerMenu');
-if (headerMenuToggle && headerMenuPanel) {
-  headerMenuToggle.addEventListener('click', e => {
-    e.preventDefault();
-    e.stopPropagation();
-    headerMenuPanel.hidden = !headerMenuPanel.hidden;
-    headerMenuToggle.setAttribute('aria-expanded', String(!headerMenuPanel.hidden));
-  });
-  headerMenuPanel.addEventListener('click', e => e.stopPropagation());
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.menu-wrap')) {
-      headerMenuPanel.hidden = true;
-      headerMenuToggle.setAttribute('aria-expanded', 'false');
-    }
-  });
-}
-const designCredit = $('designByPersistent');
-if (designCredit) {
-  designCredit.href = 'https://www.instagram.com/sksahinur.islam/';
-  designCredit.target = '_blank';
-  designCredit.rel = 'noopener noreferrer';
-}
+$('menuToggle').onclick=()=>{const menu=$('headerMenu');menu.hidden=!menu.hidden;$('menuToggle').setAttribute('aria-expanded',String(!menu.hidden))};
+document.addEventListener('click',e=>{if(!e.target.closest('.menu-wrap')){$('headerMenu').hidden=true;$('menuToggle').setAttribute('aria-expanded','false')}});
 $('menuProfile').onclick=()=>{ $('headerMenu').hidden=true; if(!currentUser){authForm();return} openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">প্রোফাইল</h2><div class="profile-card"><p><b>নাম:</b> ${escapeHtml(currentUser.displayName||'নাম সেট করা নেই')}</p><p><b>ইমেইল:</b> ${escapeHtml(currentUser.email||'—')}</p><p><b>অ্যাকাউন্ট:</b> ${currentUser.emailVerified?'Verified':'Active'}</p></div><button class="btn btn-light full" id="profileLogoutBtn" type="button">Logout</button>`);$('profileLogoutBtn').onclick=()=>signOut(auth).then(closeModal)};$('menuOrders').onclick=()=>{ $('headerMenu').hidden=true; showOrders()};$('menuAdmin').onclick=()=>{ $('headerMenu').hidden=true; adminPanel()};$('menuLogin').onclick=()=>{ $('headerMenu').hidden=true; if(currentUser)signOut(auth);else authForm()};
 $('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();renderProducts()});$('sortSelect').onchange=e=>{sortMode=e.target.value;renderProducts()};document.addEventListener('click',e=>{if(e.target?.id==='signOutBtn')signOut(auth).then(closeModal)});$('cartBtn').onclick=openCart;const stickyOpen=$('stickyCartOpen'),stickyProceed=$('stickyCartProceed');if(stickyOpen)stickyOpen.onclick=openCart;if(stickyProceed)stickyProceed.onclick=openCart;$('cartClose').onclick=closeCart;$('drawerShade').onclick=closeCart;$('checkoutBtn').onclick=checkoutForm;$('modalClose').onclick=closeModal;$('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal()});$('adminLink').onclick=adminPanel;$('ordersLink').onclick=e=>{e.preventDefault();showOrders()};$('year').textContent=new Date().getFullYear();renderCategories();renderProducts();renderCartCount();renderCart();
 if(!configReady){ /* Header login button removed; auth entry remains in the 3-dot menu. */ }
