@@ -1,7 +1,14 @@
-ASIK STORE - Bill Font + Customer Confirmation + Delivery Fee Toggle
+ASIK STORE - Admin Full Page + Orders Update
 
-1) GitHub repository-তে app.js এবং styles.css replace করুন। fonts/ ফোল্ডারের দুটি .ttf ফাইল একই পথে রাখুন। payment-qr.jpg আগের ফাইল থাকলে সেটি অক্ষত রাখুন।
-2) Admin panel > Website & Branding-এ গিয়ে “গ্রাহকের বিল থেকে ডেলিভারি চার্জ লুকান” checkbox tick/untick করে Save করুন। এটি শুধু বিলের লাইন লুকায়, মোট অর্ডার/চার্জের ডেটা বদলায় না।
-3) Customer order submit-এর পর “অর্ডার কনফার্ম করুন” বোতাম চাপতে পারবে। এটি Firebase-এ customerConfirmed/customerConfirmedAt save করে।
-4) IMPORTANT: Customer confirmation update কাজ করতে Firebase Console > Firestore Database > Rules-এ এই ZIP-এর firestore.rules-এর orders match-এ থাকা user-only update rule প্রয়োগ করতে হবে। আপনার নিজস্ব অতিরিক্ত rules থাকলে পুরো rules ফাইল অন্ধভাবে replace না করে শুধু orders match-এর allow update অংশ মিলিয়ে নিন। Publish rules করুন।
-5) UPI payment status স্বয়ংক্রিয়ভাবে verify হয় না। Customer order confirmation is NOT payment confirmation.
+Included files: index.html, app.js, styles.css, firestore.rules, payment-qr.jpg, fonts/.
+
+Upload all files to the root of your existing GitHub repository, preserving the fonts/ folder. Replace existing files with the same names; do not delete unrelated repository files. Commit changes.
+
+Changes:
+- Admin dashboard occupies the full screen instead of appearing as a small popup.
+- Orders display as compact expandable rows; tap a row to expand details.
+- New pending orders are highlighted green.
+- Admin can update order status and delete an order after confirmation.
+- Admin notification counter shows pending orders not yet cleared in this browser; Clear marks current orders as seen. New order IDs appear as new notifications.
+
+Note: Notification read-state is stored in this browser's localStorage, not shared between devices. Test order deletion and status changes with a test order first. Firestore rules must allow Admin update/delete on orders.
