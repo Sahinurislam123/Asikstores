@@ -182,3 +182,6 @@
 
 /* Profile and admin access feedback */
 .access-denied{text-align:center;padding:12px 4px 4px}.access-denied-icon{font-size:42px;margin:4px auto 12px}.access-denied h2{letter-spacing:.06em;color:#b42318}.access-denied p{line-height:1.65;color:var(--muted)}.profile-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin:16px 0}.profile-card p{overflow-wrap:anywhere;line-height:1.5}
+.admin-toggle-row{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;gap:10px!important;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f7fbf7}
+.admin-toggle-row input{flex:0 0 auto}
+.confirmed-order-btn{background:#e7f7ec!important;color:#176534!important;border-color:#a8d9b6!important}

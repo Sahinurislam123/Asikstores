@@ -1,12 +1,7 @@
-ASIK STORE update files
+ASIK STORE - Bill Font + Customer Confirmation + Delivery Fee Toggle
 
-Replace these existing repository files:
-- index.html
-- app.js
-- styles.css
-
-Upload both font files inside a repository folder named fonts:
-- fonts/Nirlipta-Regular.ttf
-- fonts/Photograph-Signature.ttf
-
-Commit changes, then refresh the site. Header no longer displays the user's personal name; the menu includes Profile and Admin Panel. Non-admin users see ACCESS DENIED if they tap Admin Panel.
+1) GitHub repository-তে app.js এবং styles.css replace করুন। fonts/ ফোল্ডারের দুটি .ttf ফাইল একই পথে রাখুন। payment-qr.jpg আগের ফাইল থাকলে সেটি অক্ষত রাখুন।
+2) Admin panel > Website & Branding-এ গিয়ে “গ্রাহকের বিল থেকে ডেলিভারি চার্জ লুকান” checkbox tick/untick করে Save করুন। এটি শুধু বিলের লাইন লুকায়, মোট অর্ডার/চার্জের ডেটা বদলায় না।
+3) Customer order submit-এর পর “অর্ডার কনফার্ম করুন” বোতাম চাপতে পারবে। এটি Firebase-এ customerConfirmed/customerConfirmedAt save করে।
+4) IMPORTANT: Customer confirmation update কাজ করতে Firebase Console > Firestore Database > Rules-এ এই ZIP-এর firestore.rules-এর orders match-এ থাকা user-only update rule প্রয়োগ করতে হবে। আপনার নিজস্ব অতিরিক্ত rules থাকলে পুরো rules ফাইল অন্ধভাবে replace না করে শুধু orders match-এর allow update অংশ মিলিয়ে নিন। Publish rules করুন।
+5) UPI payment status স্বয়ংক্রিয়ভাবে verify হয় না। Customer order confirmation is NOT payment confirmation.
