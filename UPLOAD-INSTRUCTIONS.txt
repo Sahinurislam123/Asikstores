@@ -1,8 +1,15 @@
-ASIK STORE - Targeted fixes only
+ASIK STORE — Expandable Admin Product List
 
-This ZIP keeps the existing design and features, with only these fixes:
-1. Restore the same yellow bottom sticky cart bar, show its current total/count/thumbnail, and hide it while the cart drawer is open so it does not cover Subtotal/Checkout.
-2. Show full product photos without cropping and restore a taller product image area on mobile.
-3. Improve checkout map loading retry/fallback and initialize it after the checkout form is visible.
+What changed:
+- Admin > Products now shows compact product cards similar to the Orders list.
+- Tap a product card to expand its details and edit form in the same card.
+- Product thumbnail, category, stock, price, active/inactive status appear in the compact row.
+- Existing variant price/quantity editing, image URL/upload, description, stock, active toggle, save and delete remain available.
+- Existing customer-facing bottom cart bar, product image display, map and other features are preserved from the source package.
 
-Upload/replace only index.html, app.js, and styles.css in the existing GitHub repository. Keep firestore.rules, payment-qr.jpg, and fonts as they are unless you intentionally need to replace them. Commit changes, then refresh the site. Map requires internet access to load Leaflet and OpenStreetMap tiles.
+Upload to GitHub Pages:
+1. Replace index.html, app.js and styles.css in the Asikstores repository.
+2. Keep firestore.rules, payment-qr.jpg and fonts/ unchanged if already present.
+3. Commit changes, wait for GitHub Pages deployment, then refresh the site.
+
+Note: Live Firebase deployment was not testable from this package. Test editing one product and one variant after upload.

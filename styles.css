@@ -273,3 +273,25 @@ body:has(.drawer.open) .sticky-cart-bar{display:none!important}
 .cart-items{min-height:0;overscroll-behavior:contain}
 .cart-bottom{flex:0 0 auto;padding-bottom:calc(10px + env(safe-area-inset-bottom));background:#fff}
 .delivery-map{min-height:230px;display:block}
+
+/* Compact expandable product cards in Admin > Products */
+.admin-dashboard #adminProducts{display:grid;gap:10px}
+.admin-dashboard #adminProducts>.admin-product-card{display:block;margin:0;padding:0;overflow:hidden;border:1px solid #e1e9e3;border-radius:14px;background:#fff;box-shadow:0 3px 12px #173a2507}
+.admin-product-summary{display:flex;align-items:center;gap:11px;padding:12px;cursor:pointer;list-style:none;min-height:76px}
+.admin-product-summary::-webkit-details-marker{display:none}
+.admin-product-thumb{flex:0 0 52px;width:52px;height:52px;border-radius:12px;background:#f0f7f1;display:grid;place-items:center;overflow:hidden;font-size:24px;color:#236b40}
+.admin-product-thumb img{width:100%;height:100%;object-fit:contain;padding:3px;display:block}
+.admin-product-summary-main{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.admin-product-summary-main strong{font-size:14px;color:#173a25;overflow-wrap:anywhere}
+.admin-product-summary-main small{font-size:11px;color:#758279}
+.admin-product-summary-price{font-size:13px;font-weight:800;color:#1b5732}
+.admin-product-summary-side{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0}
+.admin-product-chevron{font-size:22px;line-height:16px;color:#23874a;transition:transform .15s}
+.admin-product-card[open] .admin-product-chevron{transform:rotate(180deg)}
+.admin-product-inactive{background:#f4f4f4;color:#727872}
+.admin-product-card>.edit-product-form{padding:14px;border-top:1px solid #e8eee9;background:#fbfdfb}
+.admin-product-card>.edit-product-form>b{display:block;font-size:13px;color:#17432a;padding-bottom:10px;border-bottom:1px solid #e7eee8}
+.admin-product-active-toggle{display:flex!important;grid-template-columns:auto 1fr;align-items:center;gap:8px!important}
+.admin-product-actions{align-items:center}
+.admin-product-actions .danger{color:#b42318;border-color:#f0c9c6}
+@media(max-width:420px){.admin-product-summary{padding:10px;gap:9px}.admin-product-thumb{width:46px;height:46px;flex-basis:46px}.admin-product-summary-main strong{font-size:13px}.admin-product-summary-side .pill{font-size:9px;padding:4px 6px}}
