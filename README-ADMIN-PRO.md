@@ -1,19 +1,7 @@
-ASIK STORE — Order Details + Category Images update
+ASIK STORE — Cart Product Image Fix 2
 
-Replace these two files in your GitHub repository root:
-- app.js
-- styles.css
+This update adds image upload to the existing product edit form. Earlier the cart used a fallback shopping-cart icon when a product had no saved imageUrl.
 
-Do not replace index.html, firestore.rules, storage.rules, or payment-qr.jpg for this update.
+Install: replace app.js and styles.css in GitHub (styles.css is included unchanged), commit, wait for Pages Success. In Admin > Products, edit each product and either provide a public image URL or upload an image, then Save. The image URL is saved in Firestore and the cart uses it.
 
-What's changed:
-1. Admin Orders now has a clickable “বিস্তারিত দেখুন” button for each order.
-2. Order details modal displays customer name, phone, email, full address, delivery note, payment method/status, item list, subtotal, delivery fee, total, and map link/coordinates when saved.
-3. Admin can still update order status; “Confirmed / Accept” is available in the status dropdown.
-4. Category creation/editing supports an image URL or direct image upload. Uploads go to Firebase Storage under categories/ and the download URL is stored in storeSettings/main categories.
-5. Category images display in the storefront category buttons when imageUrl is set; otherwise emoji is shown.
-
-Notes:
-- Firebase Storage must be enabled and Storage Rules must permit authenticated Admin uploads to categories/.
-- Existing orders without deliveryLocation cannot show a map; only new orders with a selected map location include coordinates.
-- Test in a non-production order first. This package was syntax-checked but not tested against the live Firebase project.
+Firebase Storage must be enabled and Storage Rules must allow the signed-in Admin to upload. Max upload size: 3 MB. This package has not been tested against the live Firebase project.
