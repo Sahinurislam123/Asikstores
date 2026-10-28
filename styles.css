@@ -218,3 +218,9 @@
 .vendor-item input[type="checkbox"]{width:19px;height:19px;accent-color:#168447;vertical-align:middle;margin-right:7px}
 .vendor-item:has(input:checked){background:#e7f8ec;color:#176638}
 #downloadOrderBillBtn,#whatsappOrderBillBtn{margin-top:8px}
+
+/* Admin-configured product quantity/weight variants */
+.variant-select-label{display:flex;flex-direction:column;gap:5px;margin:8px 0;font-size:.82rem;color:var(--muted,#65736a)}
+.product-variant-select{width:100%;min-width:0;padding:8px;border:1px solid #d9e5dc;border-radius:10px;background:#fff;color:#183b28;font:inherit;font-size:.9rem}
+.product-info .product-bottom{align-items:center}
+.edit-product-form textarea[name="variants"]{min-height:90px}

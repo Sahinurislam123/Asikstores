@@ -27,8 +27,7 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'pending'
         && request.resource.data.paymentMethod in ['cod', 'upi_qr', 'upi_intent']
-        && ((request.resource.data.paymentMethod == 'cod' && request.resource.data.paymentStatus == 'pending')
-          || (request.resource.data.paymentMethod == 'upi_intent' && request.resource.data.paymentStatus == 'pending_verification')
+        && ((request.resource.data.paymentMethod in ['cod', 'upi_intent'] && request.resource.data.paymentStatus == 'pending')
           || (request.resource.data.paymentMethod == 'upi_qr' && request.resource.data.paymentStatus == 'pending_verification' && request.resource.data.paymentReference is string && request.resource.data.paymentReference.size() >= 6));
       allow read: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       allow update: if isAdmin() || (
