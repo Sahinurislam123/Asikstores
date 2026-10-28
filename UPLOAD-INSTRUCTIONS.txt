@@ -1,5 +1,12 @@
-ASIK STORE update
-1. Replace app.js and index.html/styles.css only if included. For this update, replace app.js in your GitHub repository.
-2. Commit changes.
-3. When logged in, the header Login button is hidden; no user name or “Account” text appears in the header. Profile remains in the three-dot menu.
-4. When logged out, Login remains visible.
+ASIK STORE update files
+
+Replace these existing repository files:
+- index.html
+- app.js
+- styles.css
+
+Upload both font files inside a repository folder named fonts:
+- fonts/Nirlipta-Regular.ttf
+- fonts/Photograph-Signature.ttf
+
+Commit changes, then refresh the site. Header no longer displays the user's personal name; the menu includes Profile and Admin Panel. Non-admin users see ACCESS DENIED if they tap Admin Panel.
