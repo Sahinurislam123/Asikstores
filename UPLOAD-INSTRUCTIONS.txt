@@ -1,7 +1,16 @@
-ASIK STORE Amazon-style sticky cart bar fix
+ASIK STORE selected quantity/price + bottom cart bar fix
 
-Upload index.html, app.js, and styles.css from this ZIP to your GitHub repository root, replacing the same-named files. Keep your Firebase configuration and Firestore Rules safe; do not replace live Rules blindly.
+Upload these files from the ZIP to the repository root, replacing the same-named files:
+- app.js
+- styles.css
 
-Fixes: bottom cart bar is shown when cart has items; updates item count and subtotal; shows first item thumbnail; clicking either the preview or yellow button opens the existing cart bottom sheet. Selected quantity variants remain in the cart using the current app.js logic.
+Keep index.html, firestore.rules, payment-qr.jpg and fonts unchanged.
 
-JavaScript syntax checked. Please test after deployment.
+Fixes:
+- Selecting 250 gm ₹20 or 500 gm ₹40 updates the visible price.
+- Add to Cart stores the selected variant as its own cart item with the selected price.
+- The bottom cart bar shows the actual subtotal of selected cart variants and total item count.
+- Tapping the bottom cart bar or its button opens the cart.
+- Product detail modal also supports selecting a variant and adds the selected option.
+
+JavaScript syntax checked with node --check; test live with one product configured with at least two variants.
