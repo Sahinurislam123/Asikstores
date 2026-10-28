@@ -344,4 +344,4 @@ footer .footer-credit-wrap a:hover{text-decoration:underline;color:#0b5f2a}
 
 
 /* Keep the floating cart bar above the compact mobile bottom navigation. */
-@media(max-width:620px){.sticky-cart-bar{bottom:calc(36px + env(safe-area-inset-bottom))!important}}
+@media(max-width:620px){.sticky-cart-bar{bottom:calc(48px + env(safe-area-inset-bottom))!important}}
