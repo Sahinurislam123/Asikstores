@@ -1,3 +1,5 @@
+/* Critical fix: hidden overlays/drawers must not intercept taps */
+[hidden]{display:none !important;visibility:hidden !important;pointer-events:none !important}
 /* ASIK STORE receipt fonts */
 @font-face{font-family:'Nirlipta';src:url('./fonts/Nirlipta-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
 @font-face{font-family:'Photograph Signature';src:url('./fonts/Photograph-Signature.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
@@ -308,5 +310,5 @@ footer{flex-wrap:wrap;}
 .footer-credit-wrap .design-credit{display:inline-block;color:var(--green-dark);font-weight:700;text-decoration:none;}
 .footer-credit-wrap .design-credit:hover{text-decoration:underline;}
 
-/* Footer creator credit */
-.footer-credit{display:inline-block;margin-top:8px;color:inherit;text-decoration:none;font-size:13px;opacity:.85}.footer-credit:hover{text-decoration:underline;opacity:1}
+/* Header controls must remain tappable on mobile */
+.topbar{position:sticky;top:0;z-index:1000;isolation:isolate}.header-actions,.menu-wrap{position:relative;z-index:1001}.menu-toggle,.header-actions button{pointer-events:auto;touch-action:manipulation}.header-menu{pointer-events:auto}
