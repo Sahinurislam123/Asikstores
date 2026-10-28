@@ -1,0 +1,7 @@
+ASIK STORE — upload only these changed files to the ROOT of your GitHub repository.
+
+1) Replace existing app.js with this app.js
+2) Replace existing styles.css with this styles.css
+3) Create a folder named fonts in the repository root (if it does not exist)
+4) Upload fonts/Nirlipta-Regular.ttf and fonts/Photograph-Signature.ttf into that fonts folder
+5) Commit changes. Do not delete or replace index.html, firestore.rules, storage.rules, payment-qr.jpg, or manifest.json.
