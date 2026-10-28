@@ -1,0 +1,9 @@
+ASIK STORE current-source patch (footer credit retained)
+
+Based on the GitHub ZIP uploaded by the user.
+Files changed: index.html, app.js, styles.css.
+- Keeps/adds “Design by - Sahinur Islam” footer credit linking to Instagram.
+- Hardens the header three-dot click handler and cache-busts CSS/JS.
+
+Upload these files to the same repository folder and commit. Keep a backup first.
+Product loading: this patch does not claim to fix a Firebase/Firestore read error. If products still do not load after deployment, report the exact notice shown on the site or share a browser console screenshot so the Firestore error can be fixed precisely.
