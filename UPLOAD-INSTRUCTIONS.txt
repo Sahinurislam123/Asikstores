@@ -1,20 +1,11 @@
-ASIK STORE: Admin Order Bill / Vendor Checklist / WhatsApp
+ASIK STORE bottom cart bar update
 
-Upload/replace these files in your GitHub Pages repository:
-- app.js
-- styles.css
+Upload index.html, app.js, and styles.css from this ZIP to the repository root, replacing the same-named files. Keep firestore.rules, payment-qr.jpg, and fonts unchanged.
 
-Keep these existing assets/folders as they are:
-- index.html
-- payment-qr.jpg
-- fonts/Nirlipta-Regular.ttf
-- fonts/Photograph-Signature.ttf
-- firestore.rules (do not replace without comparing with your live rules)
+Behavior:
+- A compact sticky cart summary appears at the bottom when the cart has items.
+- Shows total amount, item count, and first product thumbnail.
+- Tapping the summary or "কার্ট দেখুন" opens the existing cart as a mobile bottom sheet.
+- Existing cart contents and checkout button remain in the sheet.
 
-Features added in Admin > Orders > Complete details:
-- Download order bill as HTML; open it and use browser Print > Save as PDF if you need a PDF.
-- WhatsApp button opens WhatsApp with order/bill text prefilled; admin manually sends it.
-- Shopkeeper product checklist; each checked item is saved to Firestore in vendorCheckedItems.
-
-Requires Admin Firestore permissions for updating orders (existing admin update rule should allow this).
-After committing, test with a real test order before using for customers.
+JavaScript syntax checked with node --check. Please test on the live site after deployment.

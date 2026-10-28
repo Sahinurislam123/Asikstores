@@ -108,11 +108,28 @@ function showProductDetails(id){const p=findProduct(id);if(!p)return;openModal(`
 function findProduct(id){return products.find(p=>p.id===id)||cartProductCache[id]||null}
 function addToCart(id){const p=findProduct(id);if(!p)return;cartProductCache[id]={id:p.id,name:p.name,category:p.category||'',unit:p.unit||'',price:Number(p.price)||0,oldPrice:Number(p.oldPrice)||0,emoji:p.emoji||'🛒',imageUrl:p.imageUrl||'',description:p.description||'',stock:p.stock,active:p.active!==false};cart[id]=(Number(cart[id])||0)+1;saveCart();showCartToast(`${p.name} কার্টে যোগ হয়েছে`)}
 function showCartToast(message){let toast=document.getElementById('cartAddToast');if(!toast){toast=document.createElement('div');toast.id='cartAddToast';toast.className='cart-add-toast';toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');document.body.appendChild(toast)}toast.textContent='✓ '+message;toast.classList.add('visible');clearTimeout(window.__asikCartToastTimer);window.__asikCartToastTimer=setTimeout(()=>toast.classList.remove('visible'),2200)}
-function renderCartCount(){$('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
+function renderCartCount(){
+ const count=Object.values(cart).reduce((a,b)=>a+b,0);
+ $('cartCount').textContent=count;
+ const bar=$('stickyCartBar'); if(!bar)return;
+ bar.hidden=count===0;
+ $('stickyCartItemsCount').textContent=count;
+ const lines=cartLines(), subtotal=lines.reduce((sum,x)=>sum+(Number(x.p.price)||0)*x.qty,0);
+ $('stickyCartAmount').textContent=money(subtotal);
+ const first=lines[0]?.p;
+ const thumb=$('stickyCartThumb');
+ if(first?.imageUrl){thumb.innerHTML=`<img src="${escapeHtml(first.imageUrl)}" alt="" onerror="this.parentElement.textContent='🛒'">`;}
+ else thumb.textContent=first?.emoji||'🛒';
+}
 function cartLines(){return Object.entries(cart).map(([id,qty])=>({p:cartProductCache[id]||findProduct(id.split('::')[0]),qty:Number(qty)||0,id})).filter(x=>x.p&&x.qty>0)}
 function renderCart(){const lines=cartLines();$('cartItems').innerHTML=lines.length?lines.map(({p,qty,id})=>`<div class="cart-item"><div class="cart-emoji">${p.imageUrl?`<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.textContent='🛒'">`:escapeHtml(p.emoji||'🛒')}</div><div><h4>${escapeHtml(p.name)}</h4><small>${money(p.price)} · ${escapeHtml(p.unit||'')}</small><div class="qty"><button data-qty="${escapeHtml(id)}" data-delta="-1">−</button><b>${qty}</b><button data-qty="${escapeHtml(id)}" data-delta="1">＋</button></div></div><b>${money(p.price*qty)}</b></div>`).join(''):'<div class="empty">আপনার কার্ট খালি। পণ্য যোগ করুন।</div>';const subtotal=lines.reduce((s,x)=>s+x.p.price*x.qty,0);$('cartSubtotal').textContent=money(subtotal);$('checkoutBtn').disabled=!lines.length;$('cartItems').querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{const id=b.dataset.qty;cart[id]=(Number(cart[id])||0)+Number(b.dataset.delta);if(cart[id]<=0){delete cart[id];delete cartProductCache[id]}else{const p=findProduct(id);if(p)cartProductCache[id]={...p}}saveCart()});}
 function openCart(){$('cartDrawer').classList.add('open');$('cartDrawer').setAttribute('aria-hidden','false');$('drawerShade').hidden=false}
 function closeCart(){$('cartDrawer').classList.remove('open');$('cartDrawer').setAttribute('aria-hidden','true');$('drawerShade').hidden=true}
+function initStickyCartBar(){
+ ['stickyCartOpen','stickyCartProceed'].forEach(id=>{const el=$(id);if(el)el.onclick=openCart});
+ const bar=$('stickyCartBar');if(bar)bar.addEventListener('click',e=>{if(e.target.closest('button'))return;openCart()});
+ renderCartCount();
+}
 function openModal(html){$('modalContent').innerHTML=html;$('modalBackdrop').hidden=false}
 function closeModal(){$('modalBackdrop').hidden=true;$('modalContent').innerHTML=''}
 function authForm(){openModal(`<span class="eyebrow">WELCOME TO ASIK STORE</span><h2 id="modalTitle">আপনার অ্যাকাউন্ট</h2><p>অর্ডার করতে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p><form id="authForm" class="form-stack"><label>ইমেইল<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>পাসওয়ার্ড<input id="authPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="কমপক্ষে ৬ অক্ষর"></label><div class="form-row"><button class="btn btn-primary" type="submit" name="mode" value="login">Login</button><button class="btn btn-light" type="submit" name="mode" value="signup">Sign up</button></div><div id="authError" class="error-text" aria-live="polite"></div></form><div class="divider-text">অথবা</div><button id="googleLogin" class="btn btn-google">G &nbsp; Continue with Google</button>`);$('authForm').onsubmit=async e=>{e.preventDefault();const mode=e.submitter?.value||'login',email=$('authEmail').value.trim(),password=$('authPassword').value;try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');if(mode==='signup'){const cred=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(cred.user,{displayName:email.split('@')[0]});await setDoc(doc(db,'users',cred.user.uid),{email,displayName:cred.user.displayName||'',createdAt:serverTimestamp()},{merge:true});}else await signInWithEmailAndPassword(auth,email,password);closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};$('googleLogin').onclick=async()=>{try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');await signInWithPopup(auth,new GoogleAuthProvider());closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};}
@@ -265,3 +282,5 @@ if(!configReady){ /* Header login button removed; auth entry remains in the 3-do
 else onAuthStateChanged(auth,async user=>{currentUser=user; const menuLogin=$('menuLogin'); if(menuLogin) menuLogin.textContent=user?'Logout':'Login'; await checkAdmin(user);});
 loadStoreSettings();
 loadProducts();
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initStickyCartBar);else initStickyCartBar();

@@ -224,3 +224,23 @@
 .product-variant-select{width:100%;min-width:0;padding:8px;border:1px solid #d9e5dc;border-radius:10px;background:#fff;color:#183b28;font:inherit;font-size:.9rem}
 .product-info .product-bottom{align-items:center}
 .edit-product-form textarea[name="variants"]{min-height:90px}
+
+/* Bottom cart preview inspired by grocery app UI */
+.sticky-cart-bar{position:fixed;z-index:14;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e1e8e1;border-radius:18px;box-shadow:0 8px 28px rgba(20,50,30,.18);max-width:720px;margin:0 auto}
+.sticky-cart-bar[hidden]{display:none}
+.sticky-cart-preview{display:flex;align-items:center;gap:10px;flex:1;min-width:0;background:transparent;border:0;text-align:left;color:inherit;padding:0;cursor:pointer}
+.sticky-cart-thumb{width:48px;height:48px;flex:0 0 48px;border-radius:50%;background:#f3f7f2;display:grid;place-items:center;font-size:25px;overflow:hidden;border:1px solid #e5ece5}
+.sticky-cart-thumb img{width:100%;height:100%;object-fit:cover}
+.sticky-cart-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sticky-cart-meta b{font-size:17px;font-weight:800}
+.sticky-cart-meta small{font-size:12px;color:#69766e;white-space:nowrap}
+.sticky-cart-proceed{border:0;border-radius:28px;background:#ffd91b;color:#151515;font-weight:800;font-size:15px;padding:14px 18px;white-space:nowrap;cursor:pointer;min-width:126px}
+.sticky-cart-proceed span{margin-left:6px}
+body:has(.sticky-cart-bar:not([hidden])){padding-bottom:90px}
+@media(max-width:600px){
+ .drawer{top:auto;right:0;left:0;bottom:0;width:100%;height:min(78dvh,760px);max-height:85dvh;border-radius:22px 22px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(110%);box-shadow:0 -15px 55px #10231930}
+ .drawer.open{transform:translateY(0)}
+ .sticky-cart-bar{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));padding:9px 10px;border-radius:16px}
+ .sticky-cart-thumb{width:42px;height:42px;flex-basis:42px}
+ .sticky-cart-proceed{padding:13px 14px;min-width:112px}
+}
