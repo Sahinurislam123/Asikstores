@@ -1,14 +1,19 @@
-ASIK STORE - Admin Full Page + Orders Update
+ASIK STORE — FINAL ORDER CONFIRM FLOW
 
-Included files: index.html, app.js, styles.css, firestore.rules, payment-qr.jpg, fonts/.
+Upload/replace these files in your GitHub repository root:
+- app.js
+- index.html (included for matching version; replace only if you want the same current header/search layout)
+- styles.css
+- firestore.rules (do not publish blindly; compare with your current rules first)
+- payment-qr.jpg
+- fonts/Nirlipta-Regular.ttf
+- fonts/Photograph-Signature.ttf
 
-Upload all files to the root of your existing GitHub repository, preserving the fonts/ folder. Replace existing files with the same names; do not delete unrelated repository files. Commit changes.
+New behavior:
+1. User fills delivery details and sees bill preview.
+2. No Firestore order is created at this stage; products remain in cart.
+3. Only when user clicks “চূড়ান্ত অর্ডার কনফার্ম করুন” is the order created and sent to Admin.
+4. Cart is cleared only after Firestore confirms order creation.
+5. If creating the order fails, cart remains and error is shown.
 
-Changes:
-- Admin dashboard occupies the full screen instead of appearing as a small popup.
-- Orders display as compact expandable rows; tap a row to expand details.
-- New pending orders are highlighted green.
-- Admin can update order status and delete an order after confirmation.
-- Admin notification counter shows pending orders not yet cleared in this browser; Clear marks current orders as seen. New order IDs appear as new notifications.
-
-Note: Notification read-state is stored in this browser's localStorage, not shared between devices. Test order deletion and status changes with a test order first. Firestore rules must allow Admin update/delete on orders.
+Test on a staging/test order before using in production. UPI payment status is not verified automatically.

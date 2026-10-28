@@ -110,41 +110,42 @@ function checkoutForm(){
  if(!currentUser){closeCart();authForm();return}
  const subtotal=cartLines().reduce((s,x)=>s+x.p.price*x.qty,0);
  closeCart();
- openModal(`<span class="eyebrow">ALMOST THERE</span><h2 id="modalTitle">অর্ডার নিশ্চিত করুন</h2><p>ডেলিভারি শুধু নিজের এলাকা ও আশেপাশের গ্রামে।</p><form id="checkoutForm" class="form-stack">
+ openModal(`<span class="eyebrow">ALMOST THERE</span><h2 id="modalTitle">ডেলিভারি তথ্য দিন</h2><p>আপনি শেষবার অর্ডার কনফার্ম না করা পর্যন্ত পণ্য কার্টেই থাকবে এবং Admin-এ অর্ডার যাবে না।</p><form id="checkoutForm" class="form-stack">
  <label>সম্পূর্ণ নাম<input id="customerName" required value="${escapeHtml(currentUser.displayName||'')}"></label>
  <label>মোবাইল নম্বর<input id="customerPhone" type="tel" required pattern="[0-9+ -]{10,15}" placeholder="10-digit mobile number"></label>
  <label>ডেলিভারি ঠিকানা<textarea id="customerAddress" required placeholder="গ্রাম, পোস্ট অফিস, পিন কোড, কাছের পরিচিত স্থান"></textarea></label>
- <div class="location-picker-wrap">
-  <div class="location-picker-head"><b>📍 ম্যাপে ডেলিভারি লোকেশন বেছে নিন</b><small>ম্যাপে ট্যাপ করুন অথবা মার্কার টেনে সঠিক বাড়ির জায়গায় রাখুন।</small></div>
-  <div id="deliveryMap" class="delivery-map" role="application" aria-label="ডেলিভারি লোকেশন ম্যাপ"></div>
-  <div class="location-picker-actions"><button type="button" id="useMyLocation" class="btn btn-light">◎ আমার বর্তমান লোকেশন</button><span id="locationStatus" class="location-status">ম্যাপে লোকেশন বেছে নেওয়া হয়নি</span></div>
-  <input type="hidden" id="deliveryLat"><input type="hidden" id="deliveryLng">
- </div>
+ <div class="location-picker-wrap"><div class="location-picker-head"><b>📍 ম্যাপে ডেলিভারি লোকেশন বেছে নিন</b><small>ম্যাপে ট্যাপ করুন অথবা মার্কার টেনে সঠিক বাড়ির জায়গায় রাখুন।</small></div><div id="deliveryMap" class="delivery-map" role="application" aria-label="ডেলিভারি লোকেশন ম্যাপ"></div><div class="location-picker-actions"><button type="button" id="useMyLocation" class="btn btn-light">◎ আমার বর্তমান লোকেশন</button><span id="locationStatus" class="location-status">ম্যাপে লোকেশন বেছে নেওয়া হয়নি</span></div><input type="hidden" id="deliveryLat"><input type="hidden" id="deliveryLng"></div>
  <label>ডেলিভারি নির্দেশ (ঐচ্ছিক)<input id="deliveryNote" placeholder="যেমন: বাড়ির সামনে ফোন করবেন"></label>
  <label class="payment-option"><input type="radio" name="payment" value="cod" checked> <span><b>Cash on Delivery</b><br><small>পণ্য পাওয়ার সময় পেমেন্ট</small></span></label>
- <label class="payment-option"><input type="radio" name="payment" value="upi_intent"> <span><b>Pay by any UPI App</b><br><small>পেমেন্ট বাটনে চাপলে ফোনে উপলভ্য UPI অ্যাপ খুলবে</small></span></label>
- <div class="warning">পণ্যের মোট: <b>${money(subtotal)}</b><br>ডেলিভারি চার্জ পরে নিশ্চিত করা হবে।</div>
- <div id="checkoutError" class="error-text" aria-live="polite"></div><button class="btn btn-primary full" type="submit">অর্ডার তৈরি করুন · ${money(subtotal)}</button></form>`);
+ <label class="payment-option"><input type="radio" name="payment" value="upi_intent"> <span><b>Pay by any UPI App</b><br><small>অর্ডার কনফার্ম করার পর UPI অ্যাপ খুলতে পারবেন</small></span></label>
+ <div class="warning">পণ্যের মোট: <b>${money(subtotal)}</b><br>ডেলিভারি চার্জ পরে নিশ্চিত করা হবে।</div><div id="checkoutError" class="error-text" aria-live="polite"></div><button class="btn btn-primary full" type="submit">বিল দেখুন · চূড়ান্ত কনফার্মের আগে</button></form>`);
  initDeliveryMap();
  $('checkoutForm').onsubmit=async e=>{
   e.preventDefault();const err=$('checkoutError');
   if(!configReady){err.textContent='Firebase config সেট করা হয়নি।';return}
   const payment=document.querySelector('input[name="payment"]:checked').value;
   const lines=cartLines(),total=lines.reduce((s,x)=>s+x.p.price*x.qty,0);
-  try{
-   const order={userId:currentUser.uid,email:currentUser.email||'',customerName:$('customerName').value.trim(),phone:$('customerPhone').value.trim(),address:$('customerAddress').value.trim(),note:$('deliveryNote').value.trim(),deliveryLocation:($('deliveryLat').value&&$('deliveryLng').value)?{lat:Number($('deliveryLat').value),lng:Number($('deliveryLng').value),mapUrl:`https://www.google.com/maps?q=${$('deliveryLat').value},${$('deliveryLng').value}`} : null,items:lines.map(x=>({productId:x.id,name:x.p.name,unit:x.p.unit||'',price:x.p.price,quantity:x.qty})),subtotal:total,deliveryFee:null,total,status:'pending',paymentMethod:payment,paymentStatus:payment==='upi_intent'?'pending_verification':'pending',paymentReference:'',createdAt:serverTimestamp()};
-   const orderRef=await addDoc(collection(db,'orders'),order);cart={};cartProductCache={};saveCart();closeModal();
-   if(payment==='upi_intent'){
-    const billHtml=makeBengaliBill(orderRef.id,order);
-    const params=new URLSearchParams({pa:'6295979909@sbi',pn:'SK ASIK HOSSEN',am:total.toFixed(2),cu:'INR',tn:`ASIK STORE order ${orderRef.id.slice(0,18)}`,tr:orderRef.id.slice(0,35)});
-    const upiUrl='upi://pay?'+params.toString();
-    openModal(`<span class="eyebrow">UPI PAYMENT</span><h2 id="modalTitle">অর্ডার তৈরি হয়েছে</h2><p>অর্ডার নম্বর: <b>${escapeHtml(orderRef.id)}</b><br>মোট পেমেন্ট: <b>${money(total)}</b></p>${billHtml}<button id="printBillBtn" class="btn btn-light full" type="button">🧾 বাংলা বিল দেখুন / প্রিন্ট করুন</button><p>নিচের বাটনে চাপলে ফোনে উপলভ্য UPI অ্যাপ খোলার চেষ্টা করবে। সেখানে নাম ও পরিমাণ মিলিয়ে নিজে পেমেন্ট নিশ্চিত করো।</p><a id="launchUpi" class="btn btn-primary full" href="${escapeHtml(upiUrl)}">UPI অ্যাপ খুলে পেমেন্ট করুন</a><div class="admin-section"><h3>বিকল্প: QR স্ক্যান</h3><img class="payment-qr-image" src="payment-qr.jpg" alt="ASIK STORE UPI QR"><p><small>QR-টি স্থির (static), তাই পেমেন্ট অ্যাপে পরিমাণ নিজে লিখতে হতে পারে।</small></p></div><p class="warning">পেমেন্ট স্বয়ংক্রিয়ভাবে যাচাই হয় না। টাকা অ্যাকাউন্টে এসেছে কি না যাচাই না হওয়া পর্যন্ত অর্ডার Pending থাকবে।</p><button id="confirmOrderBtn" class="btn btn-primary full" type="button">✓ অর্ডার কনফার্ম করুন</button><button id="doneBtn" class="btn btn-light full">পরে করব</button>`);
-    $('printBillBtn').onclick=printBengaliBill; $('launchUpi').addEventListener('click',()=>{setTimeout(()=>{if(document.visibilityState==='visible')showNotice('UPI অ্যাপ না খুললে QR ব্যবহার করুন বা ফোনে UPI অ্যাপ ইনস্টল আছে কি না দেখুন।')},1800)});
-    $('doneBtn').onclick=closeModal;$('confirmOrderBtn').onclick=()=>confirmCustomerOrder(orderRef.id,$('confirmOrderBtn'));
-   } else {
-    openModal(`<span class="eyebrow">ORDER RECEIVED</span><h2 id="modalTitle">অর্ডার জমা হয়েছে!</h2><p>আপনার COD অর্ডার জমা হয়েছে। ডেলিভারি চার্জ ও সময় নিশ্চিত করতে দোকান থেকে যোগাযোগ করা হবে।</p>${makeBengaliBill(orderRef.id,order)}<button id="printBillBtn" class="btn btn-light full" type="button">🧾 বাংলা বিল দেখুন / প্রিন্ট করুন</button><button id="confirmOrderBtn" class="btn btn-primary full" type="button">✓ অর্ডার কনফার্ম করুন</button><button id="doneBtn" class="btn btn-light full">ঠিক আছে</button>`);$('printBillBtn').onclick=printBengaliBill;$('doneBtn').onclick=closeModal;$('confirmOrderBtn').onclick=()=>confirmCustomerOrder(orderRef.id,$('confirmOrderBtn'));
-   }
-  }catch(ex){err.textContent=friendlyError(ex)}
+  const order={userId:currentUser.uid,email:currentUser.email||'',customerName:$('customerName').value.trim(),phone:$('customerPhone').value.trim(),address:$('customerAddress').value.trim(),note:$('deliveryNote').value.trim(),deliveryLocation:($('deliveryLat').value&&$('deliveryLng').value)?{lat:Number($('deliveryLat').value),lng:Number($('deliveryLng').value),mapUrl:`https://www.google.com/maps?q=${$('deliveryLat').value},${$('deliveryLng').value}`} : null,items:lines.map(x=>({productId:x.id,name:x.p.name,unit:x.p.unit||'',price:x.p.price,quantity:x.qty})),subtotal:total,deliveryFee:null,total,status:'pending',paymentMethod:payment,paymentStatus:payment==='upi_intent'?'pending_verification':'pending',paymentReference:'',customerConfirmed:true,customerConfirmedAt:null};
+  openModal(`<span class="eyebrow">FINAL ORDER REVIEW</span><h2 id="modalTitle">অর্ডার ও বিল যাচাই করুন</h2><p>এখনও কোনো অর্ডার Admin-এর কাছে পাঠানো হয়নি। নিচের <b>চূড়ান্ত অর্ডার কনফার্ম</b> বাটনে চাপলেই অর্ডার তৈরি হবে এবং কার্ট খালি হবে। ফিরে গেলে পণ্য কার্টেই থাকবে।</p>${makeBengaliBill('কনফার্মের পর তৈরি হবে',order)}<button id="printBillPreviewBtn" class="btn btn-light full" type="button">🧾 বিল প্রিভিউ প্রিন্ট</button><button id="finalConfirmOrderBtn" class="btn btn-primary full" type="button">✓ চূড়ান্ত অর্ডার কনফার্ম করুন</button><button id="backToCheckoutBtn" class="btn btn-light full" type="button">ফিরে যান · কার্ট থাকবে</button><div id="finalConfirmError" class="error-text" aria-live="polite"></div>`);
+  $('printBillPreviewBtn').onclick=printBengaliBill;
+  $('backToCheckoutBtn').onclick=()=>checkoutForm();
+  $('finalConfirmOrderBtn').onclick=async()=>{
+   const btn=$('finalConfirmOrderBtn'),finalErr=$('finalConfirmError');btn.disabled=true;btn.textContent='অর্ডার তৈরি হচ্ছে…';
+   try{
+    order.customerConfirmedAt=serverTimestamp();
+    const orderRef=await addDoc(collection(db,'orders'),order);
+    cart={};cartProductCache={};saveCart();closeModal();
+    if(payment==='upi_intent'){
+     const billHtml=makeBengaliBill(orderRef.id,order);
+     const params=new URLSearchParams({pa:'6295979909@sbi',pn:'SK ASIK HOSSEN',am:total.toFixed(2),cu:'INR',tn:`ASIK STORE order ${orderRef.id.slice(0,18)}`,tr:orderRef.id.slice(0,35)});
+     const upiUrl='upi://pay?'+params.toString();
+     openModal(`<span class="eyebrow">ORDER CONFIRMED</span><h2 id="modalTitle">অর্ডার কনফার্ম হয়েছে!</h2><p>অর্ডার নম্বর: <b>${escapeHtml(orderRef.id)}</b><br>মোট পেমেন্ট: <b>${money(total)}</b></p>${billHtml}<button id="printBillBtn" class="btn btn-light full" type="button">🧾 বাংলা বিল প্রিন্ট করুন</button><p>UPI অ্যাপে পেমেন্ট করলে নাম ও পরিমাণ মিলিয়ে নিন।</p><a id="launchUpi" class="btn btn-primary full" href="${escapeHtml(upiUrl)}">UPI অ্যাপ খুলে পেমেন্ট করুন</a><div class="admin-section"><h3>বিকল্প: QR স্ক্যান</h3><img class="payment-qr-image" src="payment-qr.jpg" alt="ASIK STORE UPI QR"><p><small>QR-তে পরিমাণ নিজে লিখতে হতে পারে।</small></p></div><p class="warning">পেমেন্ট স্বয়ংক্রিয়ভাবে যাচাই হয় না। Admin টাকা পাওয়া যাচাই করবেন।</p><button id="doneBtn" class="btn btn-light full" type="button">ঠিক আছে</button>`);
+     $('printBillBtn').onclick=printBengaliBill;$('doneBtn').onclick=closeModal;$('launchUpi').addEventListener('click',()=>{setTimeout(()=>{if(document.visibilityState==='visible')showNotice('UPI অ্যাপ না খুললে QR ব্যবহার করুন।')},1800)});
+    }else{
+     openModal(`<span class="eyebrow">ORDER CONFIRMED</span><h2 id="modalTitle">অর্ডার কনফার্ম হয়েছে!</h2><p>অর্ডার নম্বর: <b>${escapeHtml(orderRef.id)}</b><br>আপনার অর্ডার Admin-এর কাছে পাঠানো হয়েছে। ডেলিভারি চার্জ ও সময় নিশ্চিত করতে দোকান থেকে যোগাযোগ করা হবে।</p>${makeBengaliBill(orderRef.id,order)}<button id="printBillBtn" class="btn btn-light full" type="button">🧾 বাংলা বিল দেখুন / প্রিন্ট করুন</button><button id="doneBtn" class="btn btn-primary full" type="button">ঠিক আছে</button>`);$('printBillBtn').onclick=printBengaliBill;$('doneBtn').onclick=closeModal;
+    }
+   }catch(ex){btn.disabled=false;btn.textContent='✓ চূড়ান্ত অর্ডার কনফার্ম করুন';finalErr.textContent=friendlyError(ex)}
+  };
  };
 }
 async function loadProducts(){if(!configReady){renderProducts();showNotice('Demo mode: এখন নমুনা পণ্য দেখা যাচ্ছে। Firebase সংযোগ করতে README.md-এর ধাপ অনুসরণ করুন।');return}try{if(unsubProducts)unsubProducts();unsubProducts=onSnapshot(query(collection(db,'products'),orderBy('name')),snap=>{const loaded=snap.docs.map(d=>({id:d.id,...d.data()}));products=loaded;for(const [id,qty] of Object.entries(cart)){const p=loaded.find(x=>x.id===id);if(p&&Number(qty)>0)cartProductCache[id]={id:p.id,name:p.name,category:p.category||'',unit:p.unit||'',price:Number(p.price)||0,oldPrice:Number(p.oldPrice)||0,emoji:p.emoji||'🛒',imageUrl:p.imageUrl||'',description:p.description||'',stock:p.stock,active:p.active!==false}}saveCart();renderProducts();renderCartCount();renderCart();renderAdminProducts();hideNotice()},err=>{products=[];renderProducts();showNotice('Firebase products পড়া যায়নি: '+friendlyError(err),true)})}catch(e){renderProducts();showNotice(friendlyError(e),true)}}
