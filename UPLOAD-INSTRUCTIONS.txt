@@ -1,11 +1,7 @@
-ASIK STORE variant selector and separate price fields
+ASIK STORE visual/cart fix
 
-Upload app.js and styles.css from this ZIP to the repository root, replacing the same-named files. Keep your current index.html, firestore.rules, payment-qr.jpg, and fonts unchanged.
+Upload index.html, app.js, and styles.css from this ZIP to repository root, replacing same-named files. Keep Firestore rules and payment settings unchanged unless you intend to update them separately.
 
-Admin Add Product/Edit Product now has separate inputs for each quantity option and its price, plus an "Add another option" button. Example:
-Option name: ২৫০ গ্রাম
-Price: ২৫
-Add another row for ৫০০ গ্রাম and ₹50, or ১ কেজি and ₹100.
-Users will choose from the saved options on the product card.
+Fixes: product images smaller and contained, prices aligned on the left and not clipped by Add button, sticky bottom cart summary restored and updates amount/item count; tapping it opens cart bottom sheet.
 
-JavaScript syntax checked; test one sample product after publishing.
+JavaScript syntax checked with node --check; test on live GitHub Pages after commit.
