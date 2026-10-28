@@ -1,7 +1,7 @@
-ASIK STORE visual/cart fix
+ASIK STORE selected quantity/price cart fix
 
-Upload index.html, app.js, and styles.css from this ZIP to repository root, replacing same-named files. Keep Firestore rules and payment settings unchanged unless you intend to update them separately.
+Upload app.js from this ZIP to the root of your GitHub Pages repository, replacing the current app.js. Keep the current index.html, styles.css, firestore.rules, payment-qr.jpg, and fonts unchanged.
 
-Fixes: product images smaller and contained, prices aligned on the left and not clipped by Add button, sticky bottom cart summary restored and updates amount/item count; tapping it opens cart bottom sheet.
+Fix: when the user selects a quantity option (e.g. 250g = ₹25 or 500g = ₹50) and taps Add, the selected option's label and price are stored as a separate cart line. Cart subtotal and checkout order item use the selected price and quantity option. Different options for the same product remain separate cart lines.
 
-JavaScript syntax checked with node --check; test on live GitHub Pages after commit.
+JavaScript syntax checked with node --check. Test one product with two options after deployment.
