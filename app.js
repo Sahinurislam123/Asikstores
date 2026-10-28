@@ -19,6 +19,45 @@ let app, auth, db, storage;
 if (configReady) { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); storage = getStorage(app); }
 
 const $ = id => document.getElementById(id);
+
+// Delivery map state and resilient Leaflet loader.
+let deliveryMapInstance = null;
+let deliveryMapMarker = null;
+let leafletLoadPromise = null;
+function loadLeaflet(){
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletLoadPromise) return leafletLoadPromise;
+  leafletLoadPromise = new Promise((resolve, reject) => {
+    const cssUrls = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+    ];
+    if (!document.querySelector('link[data-leaflet-css]')) {
+      const link = document.createElement('link'); link.rel='stylesheet'; link.dataset.leafletCss='1'; link.href=cssUrls[0];
+      link.onerror=()=>{ link.href=cssUrls[1]; }; document.head.appendChild(link);
+    }
+    const scripts = [
+      'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
+    ];
+    let index=0;
+    const tryNext=()=>{
+      if (window.L) { resolve(window.L); return; }
+      if(index>=scripts.length){reject(new Error('Leaflet library could not be loaded'));return;}
+      const script=document.createElement('script'); script.src=scripts[index++]; script.async=true;
+      script.onload=()=>window.L?resolve(window.L):tryNext(); script.onerror=tryNext; document.head.appendChild(script);
+    };
+    tryNext();
+  });
+  return leafletLoadPromise;
+}
+function setDeliveryLocation(lat,lng){
+  const latEl=$('deliveryLat'),lngEl=$('deliveryLng'),status=$('locationStatus');
+  if(latEl)latEl.value=String(lat); if(lngEl)lngEl.value=String(lng);
+  if(deliveryMapMarker && deliveryMapInstance){deliveryMapMarker.setLatLng([lat,lng]);deliveryMapInstance.setView([lat,lng],Math.max(deliveryMapInstance.getZoom(),15));}
+  if(status)status.textContent=`লোকেশন বেছে নেওয়া হয়েছে: ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
+}
+
 let categories = [
   {name:'সব পণ্য',emoji:'🛍️'}, {name:'চাল ও আটা',emoji:'🌾'}, {name:'ডাল',emoji:'🫘'}, {name:'তেল ও মশলা',emoji:'🫙'}, {name:'বিস্কুট ও স্ন্যাকস',emoji:'🍪'}, {name:'দুধ ও পানীয়',emoji:'🥛'}, {name:'ফল ও সবজি',emoji:'🥦'}
 ];
@@ -241,7 +280,32 @@ async function loadAdminOrders(){
   });
  }catch(e){el.innerHTML=`<p class="error-text">${escapeHtml(friendlyError(e))}</p>`}
 }
-async function initDeliveryMap(){try{await loadLeaflet();if(!$('deliveryMap'))return;deliveryMapInstance=window.L.map('deliveryMap').setView([23.5,87.3],8);window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(deliveryMapInstance);deliveryMapMarker=window.L.marker([23.5,87.3],{draggable:true}).addTo(deliveryMapInstance);deliveryMapMarker.bindPopup('মার্কার টেনে সঠিক ডেলিভারি লোকেশন বেছে নিন');deliveryMapInstance.on('click',e=>setDeliveryLocation(e.latlng.lat,e.latlng.lng));deliveryMapMarker.on('dragend',()=>{const p=deliveryMapMarker.getLatLng();setDeliveryLocation(p.lat,p.lng)});$('useMyLocation').onclick=()=>{if(!navigator.geolocation){$('locationStatus').textContent='এই ব্রাউজারে লোকেশন সাপোর্ট নেই। ম্যাপে ট্যাপ করুন।';return}$('locationStatus').textContent='আপনার অনুমতি নিয়ে লোকেশন খোঁজা হচ্ছে…';navigator.geolocation.getCurrentPosition(pos=>{setDeliveryLocation(pos.coords.latitude,pos.coords.longitude);deliveryMapMarker.openPopup()},()=>{$('locationStatus').textContent='লোকেশন পাওয়া যায়নি। ম্যাপে ট্যাপ করে বেছে নিন।'},{enableHighAccuracy:true,timeout:12000,maximumAge:60000})};setTimeout(()=>deliveryMapInstance.invalidateSize(),250)}catch(e){if($('locationStatus'))$('locationStatus').textContent='ম্যাপ লোড হয়নি। পরে আবার চেষ্টা করুন বা সাপোর্টে জানান।';console.warn(e)}}
+async function initDeliveryMap(){
+  const mapEl=$('deliveryMap'); if(!mapEl)return;
+  try{
+    await loadLeaflet();
+    if(!document.getElementById('leaflet-marker-fix')){
+      const style=document.createElement('style');style.id='leaflet-marker-fix';style.textContent='.leaflet-container{font:12px/1.5 sans-serif;z-index:1}.leaflet-control-attribution{font-size:9px!important}';document.head.appendChild(style);
+    }
+    if(deliveryMapInstance){setTimeout(()=>deliveryMapInstance.invalidateSize(),150);return;}
+    deliveryMapInstance=window.L.map(mapEl,{scrollWheelZoom:false}).setView([23.55,87.25],10);
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19,attribution:'&copy; OpenStreetMap contributors',
+      errorTileUrl:'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    }).addTo(deliveryMapInstance);
+    deliveryMapMarker=window.L.marker([23.55,87.25],{draggable:true}).addTo(deliveryMapInstance);
+    deliveryMapMarker.bindPopup('মার্কার টেনে সঠিক ডেলিভারি লোকেশন বেছে নিন');
+    deliveryMapInstance.on('click',e=>setDeliveryLocation(e.latlng.lat,e.latlng.lng));
+    deliveryMapMarker.on('dragend',()=>{const p=deliveryMapMarker.getLatLng();setDeliveryLocation(p.lat,p.lng)});
+    const useBtn=$('useMyLocation'); if(useBtn)useBtn.onclick=()=>{
+      if(!navigator.geolocation){if($('locationStatus'))$('locationStatus').textContent='এই ব্রাউজারে লোকেশন সাপোর্ট নেই। ম্যাপে ট্যাপ করুন।';return;}
+      if($('locationStatus'))$('locationStatus').textContent='আপনার অনুমতি নিয়ে লোকেশন খোঁজা হচ্ছে…';
+      navigator.geolocation.getCurrentPosition(pos=>{setDeliveryLocation(pos.coords.latitude,pos.coords.longitude);if(deliveryMapMarker)deliveryMapMarker.openPopup()},()=>{if($('locationStatus'))$('locationStatus').textContent='লোকেশন পাওয়া যায়নি। অনুমতি দিন অথবা ম্যাপে ট্যাপ করুন।'},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+    };
+    setTimeout(()=>deliveryMapInstance&&deliveryMapInstance.invalidateSize(),300);
+    if($('locationStatus'))$('locationStatus').textContent='ম্যাপে ট্যাপ করুন অথবা মার্কার টেনে লোকেশন বেছে নিন।';
+  }catch(e){if($('locationStatus'))$('locationStatus').textContent='ম্যাপ লোড হয়নি। ইন্টারনেট চালু করে আবার চেষ্টা করুন; চাইলে ঠিকানা লিখেও এগোতে পারবেন।';console.warn('Delivery map load failed:',e);}
+}
 
 async function showOrders(){if(!currentUser){authForm();return}if(!configReady){showNotice('Firebase config বসানোর পর আপনার অর্ডার দেখা যাবে।');return}try{const snap=await getDocs(query(collection(db,'orders'),where('userId','==',currentUser.uid),orderBy('createdAt','desc')));const own=snap.docs;openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">আমার অর্ডার</h2>${own.length?own.map(d=>{const o=d.data();return `<div class="admin-section"><b>${money(o.subtotal)} · <span class="pill">${escapeHtml(o.status||'pending')}</span></b><p>${escapeHtml((o.items||[]).map(i=>`${i.name} × ${i.quantity}`).join(', '))}</p><small>${escapeHtml(o.address||'')} · ${escapeHtml(o.paymentMethod||'')}</small></div>`}).join(''):'<p>আপনি এখনও কোনো অর্ডার করেননি।</p>'}`)}catch(e){showNotice(friendlyError(e),true)}}
 $('searchToggle').onclick=()=>{const wrap=$('searchWrap');const expanded=wrap.classList.toggle('expanded');$('searchToggle').setAttribute('aria-expanded',String(expanded));if(expanded){$('searchInput').focus()}else{$('searchInput').value='';searchTerm='';renderProducts()}};
