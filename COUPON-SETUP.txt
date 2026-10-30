@@ -1,0 +1,22 @@
+ASIK STORE — Coupon Manager Update
+
+Included:
+- Cart coupon field with server-side Firestore document lookup.
+- Fixed-amount and percentage discounts.
+- Minimum cart subtotal, optional maximum discount for percentage coupons, expiry date, enable/disable, edit and delete.
+- Discount is applied to the cart payable total, checkout review, saved order, printable bill and UPI payment amount.
+- Existing bottom navigation/cart/header CSS retained from the latest CSS-only update.
+
+Install:
+1. Download and extract this ZIP.
+2. Upload/replace the included index.html, app.js, and styles.css in the root of the existing GitHub Pages repository. Keep all existing image/font/CNAME files in the repository; the ZIP includes the base source assets too.
+3. Commit changes and wait for GitHub Pages to deploy.
+4. Sign in as an Admin, open Admin Panel → Coupons, create a coupon such as SAVE20, choose fixed ₹20, and keep it active.
+5. Open the cart, enter SAVE20 and press Apply. The discount should appear before checkout.
+
+Storage and permissions:
+Coupons are saved in the existing Firestore document storeSettings/main under the coupons array. The included firestore.rules already allows public reads of storeSettings and admin-only writes, so no new rules are needed for coupon management. Keep the existing rules deployed; do not replace them with open write permissions.
+
+Important:
+- This client-side UI shows a discount in the order total. If you later add server-side payment verification, revalidate coupon eligibility on the trusted server too.
+- Expiry is checked at coupon application time. Discounts never exceed the cart subtotal.
