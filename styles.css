@@ -343,13 +343,14 @@ footer .footer-credit-wrap a:hover{text-decoration:underline;color:#0b5f2a}
 }
 
 
-/* Fix: keep the full floating cart bar above the visible mobile bottom navigation */
+/* Fine-tune floating cart and checkout button alignment on mobile */
 @media(max-width:620px){
   .sticky-cart-bar{
-    bottom:calc(92px + env(safe-area-inset-bottom))!important;
+    bottom:calc(68px + env(safe-area-inset-bottom))!important;
     z-index:49!important;
   }
-  body:has(.sticky-cart-bar:not([hidden])){padding-bottom:calc(150px + env(safe-area-inset-bottom))!important}
+  .sticky-cart-proceed{transform:translateY(-2px)}
+  body:has(.sticky-cart-bar:not([hidden])){padding-bottom:calc(126px + env(safe-area-inset-bottom))!important}
 }
 
 /* ASIK STORE coupon system */
