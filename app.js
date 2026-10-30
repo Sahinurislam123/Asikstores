@@ -463,7 +463,27 @@ async function initDeliveryMap(){
   }
 }
 
-async function showOrders(){if(!currentUser){authForm();return}if(!configReady){showNotice('Firebase config বসানোর পর আপনার অর্ডার দেখা যাবে।');return}try{const snap=await getDocs(query(collection(db,'orders'),where('userId','==',currentUser.uid)));const own=snap.docs.sort((a,b)=>{const av=a.data().createdAt?.toMillis?.()||0,bv=b.data().createdAt?.toMillis?.()||0;return bv-av});openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">আমার অর্ডার</h2>${own.length?own.map(d=>{const o=d.data();return `<div class="admin-section"><b>${money(o.subtotal)} · <span class="pill">${escapeHtml(o.status||'pending')}</span></b><p>${escapeHtml((o.items||[]).map(i=>`${i.name} × ${i.quantity}`).join(', '))}</p><small>${escapeHtml(o.address||'')} · ${escapeHtml(o.paymentMethod||'')}</small></div>`}).join(''):'<p>আপনি এখনও কোনো অর্ডার করেননি।</p>'}`)}catch(e){showNotice(friendlyError(e),true)}}
+async function showOrders(){
+ if(!currentUser){authForm();return}
+ if(!configReady){showNotice('Firebase config বসানোর পর আপনার অর্ডার দেখা যাবে।');return}
+ try{
+  const snap=await getDocs(query(collection(db,'orders'),where('userId','==',currentUser.uid)));
+  const own=snap.docs.sort((a,b)=>{const av=a.data().createdAt?.toMillis?.()||0,bv=b.data().createdAt?.toMillis?.()||0;return bv-av});
+  openModal(`<span class="eyebrow">YOUR ACCOUNT</span><h2 id="modalTitle">আমার অর্ডার</h2>${own.length?own.map(d=>{const o=d.data();const status=o.status||'pending';return `<div class="admin-section" data-my-order="${escapeHtml(d.id)}"><b>${money(o.total??o.subtotal)} · <span class="pill">${escapeHtml(status)}</span></b><p>${escapeHtml((o.items||[]).map(i=>`${i.name} × ${i.quantity}`).join(', '))}</p><small>${escapeHtml(o.address||'')} · ${escapeHtml(o.paymentMethod||'')}</small>${status==='pending'?`<button type="button" class="btn btn-light full" style="margin-top:10px;color:#b42318;border-color:#f2b8b5" data-cancel-my-order="${escapeHtml(d.id)}">অর্ডার বাতিল করুন</button>`:''}${status==='cancelled'?'<p class="muted">এই অর্ডারটি বাতিল করা হয়েছে।</p>':''}</div>`}).join(''):'<p>আপনি এখনও কোনো অর্ডার করেননি।</p>'}`);
+  document.querySelectorAll('[data-cancel-my-order]').forEach(btn=>btn.onclick=async()=>{
+   const id=btn.dataset.cancelMyOrder;
+   if(!confirm('অর্ডারটি বাতিল করতে চান? দোকানদার অর্ডার Accept করার আগে এটি বাতিল করা যাবে।'))return;
+   btn.disabled=true;btn.textContent='বাতিল করা হচ্ছে…';
+   try{
+    const ref=doc(db,'orders',id);const fresh=await getDoc(ref);
+    if(!fresh.exists()||fresh.data().userId!==currentUser.uid)throw new Error('অর্ডারটি পাওয়া যায়নি।');
+    if((fresh.data().status||'pending')!=='pending')throw new Error('দোকানদার অর্ডার Accept করে ফেলেছেন। এখন আর বাতিল করা যাবে না।');
+    await updateDoc(ref,{status:'cancelled',customerCancelledAt:serverTimestamp()});
+    showNotice('আপনার অর্ডার বাতিল হয়েছে।');await showOrders();
+   }catch(e){showNotice(friendlyError(e)||e.message||'অর্ডার বাতিল করা যায়নি।',true);await showOrders()}
+  });
+ }catch(e){showNotice(friendlyError(e),true)}
+}
 function closeProductSearch(clear=true){const wrap=$('searchWrap');if(!wrap)return;wrap.classList.remove('expanded');$('searchToggle').setAttribute('aria-expanded','false');if(clear){$('searchInput').value='';searchTerm='';renderProducts()}}
 $('searchToggle').onclick=e=>{e.stopPropagation();const wrap=$('searchWrap');const expanded=wrap.classList.contains('expanded');if(expanded){closeProductSearch(true)}else{wrap.classList.add('expanded');$('searchToggle').setAttribute('aria-expanded','true');setTimeout(()=>$('searchInput').focus(),0)}};
 $('searchInput').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeProductSearch(true);$('searchToggle').focus()}if(e.key==='Enter'){e.preventDefault();$('productGrid').scrollIntoView({behavior:'smooth',block:'start'})}});

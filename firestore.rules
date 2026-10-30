@@ -46,6 +46,13 @@ service cloud.firestore {
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.customerConfirmed == true
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['customerConfirmed', 'customerConfirmedAt'])
+      ) || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'customerCancelledAt'])
       );
       allow delete: if isAdmin();
     }
