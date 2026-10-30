@@ -209,7 +209,7 @@ function saveDeliveryProfile(profile){try{localStorage.setItem(deliveryProfileSt
 function checkoutForm(){
  if(!cartLines().length)return;
  if(!currentUser){closeCart();authForm();return}
- const subtotal=cartLines().reduce((s,x)=>s+x.p.price*x.qty,0);
+ const subtotal=cartLines().reduce((s,x)=>s+x.p.price*x.qty,0),discount=couponDiscountFor(subtotal),total=Math.max(0,subtotal-discount);
  closeCart();
  openModal(`<span class="eyebrow">ALMOST THERE</span><h2 id="modalTitle">ডেলিভারি তথ্য দিন</h2><p>আপনি শেষবার অর্ডার কনফার্ম না করা পর্যন্ত পণ্য কার্টেই থাকবে এবং Admin-এ অর্ডার যাবে না।</p><form id="checkoutForm" class="form-stack">
  <label>সম্পূর্ণ নাম<input id="customerName" required value="${escapeHtml(getSavedDeliveryProfile().name||currentUser.displayName||'')}"></label>
