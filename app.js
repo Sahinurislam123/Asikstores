@@ -203,17 +203,25 @@ function openModal(html){$('modalContent').innerHTML=html;$('modalBackdrop').hid
 function closeModal(){$('modalBackdrop').hidden=true;$('modalContent').innerHTML=''}
 function authForm(){openModal(`<span class="eyebrow">WELCOME TO ASIK STORE</span><h2 id="modalTitle">আপনার অ্যাকাউন্ট</h2><p>অর্ডার করতে লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন।</p><form id="authForm" class="form-stack"><label>ইমেইল<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label><label>পাসওয়ার্ড<input id="authPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="কমপক্ষে ৬ অক্ষর"></label><div class="form-row"><button class="btn btn-primary" type="submit" name="mode" value="login">Login</button><button class="btn btn-light" type="submit" name="mode" value="signup">Sign up</button></div><div id="authError" class="error-text" aria-live="polite"></div></form><div class="divider-text">অথবা</div><button id="googleLogin" class="btn btn-google">G &nbsp; Continue with Google</button>`);$('authForm').onsubmit=async e=>{e.preventDefault();const mode=e.submitter?.value||'login',email=$('authEmail').value.trim(),password=$('authPassword').value;try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');if(mode==='signup'){const cred=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(cred.user,{displayName:email.split('@')[0]});await setDoc(doc(db,'users',cred.user.uid),{email,displayName:cred.user.displayName||'',createdAt:serverTimestamp()},{merge:true});}else await signInWithEmailAndPassword(auth,email,password);closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};$('googleLogin').onclick=async()=>{try{if(!configReady)throw Error('প্রথমে app.js-এ Firebase config বসান।');await signInWithPopup(auth,new GoogleAuthProvider());closeModal()}catch(err){$('authError').textContent=friendlyError(err)}};}
 function friendlyError(err){const map={'auth/invalid-credential':'ইমেইল বা পাসওয়ার্ড সঠিক নয়।','auth/email-already-in-use':'এই ইমেইল দিয়ে অ্যাকাউন্ট আছে।','auth/weak-password':'আরও শক্তিশালী পাসওয়ার্ড দিন।','auth/popup-closed-by-user':'Google Login বাতিল হয়েছে।','auth/unauthorized-domain':'Firebase Authentication-এ এই ডোমেইন অনুমোদন করুন।','permission-denied':'Firebase Security Rules অনুমতি দেয়নি।'};return map[err.code]||err.message||'একটি সমস্যা হয়েছে।'}
+function deliveryProfileStorageKey(){return 'asikStoreDeliveryProfile:'+((currentUser&&currentUser.uid)||'guest')}
+function getSavedDeliveryProfile(){try{return JSON.parse(localStorage.getItem(deliveryProfileStorageKey())||'{}')||{}}catch(e){return {}}}
+function saveDeliveryProfile(profile){try{localStorage.setItem(deliveryProfileStorageKey(),JSON.stringify(profile))}catch(e){console.warn('Delivery profile could not be saved on this device:',e)}}
 function checkoutForm(){
  if(!cartLines().length)return;
  if(!currentUser){closeCart();authForm();return}
  const subtotal=cartLines().reduce((s,x)=>s+x.p.price*x.qty,0);
  closeCart();
  openModal(`<span class="eyebrow">ALMOST THERE</span><h2 id="modalTitle">ডেলিভারি তথ্য দিন</h2><p>আপনি শেষবার অর্ডার কনফার্ম না করা পর্যন্ত পণ্য কার্টেই থাকবে এবং Admin-এ অর্ডার যাবে না।</p><form id="checkoutForm" class="form-stack">
- <label>সম্পূর্ণ নাম<input id="customerName" required value="${escapeHtml(currentUser.displayName||'')}"></label>
- <label>মোবাইল নম্বর<input id="customerPhone" type="tel" required pattern="[0-9+ -]{10,15}" placeholder="10-digit mobile number"></label>
- <label>ডেলিভারি ঠিকানা<textarea id="customerAddress" required placeholder="গ্রাম, পোস্ট অফিস, পিন কোড, কাছের পরিচিত স্থান"></textarea></label>
+ <label>সম্পূর্ণ নাম<input id="customerName" required value="${escapeHtml(getSavedDeliveryProfile().name||currentUser.displayName||'')}"></label>
+ <label>মোবাইল নম্বর<input id="customerPhone" type="tel" required pattern="[0-9+ -]{10,15}" placeholder="10-digit mobile number" value="${escapeHtml(getSavedDeliveryProfile().phone||'')}"></label>
+ <label>বাড়ি / গ্রাম<input id="deliveryVillage" required placeholder="বাড়ি ও গ্রামের নাম" value="${escapeHtml(getSavedDeliveryProfile().village||'')}"></label>
+ <label>পোস্ট অফিস<input id="deliveryPostOffice" required placeholder="পোস্ট অফিস" value="${escapeHtml(getSavedDeliveryProfile().postOffice||'')}"></label>
+ <label>থানা<input id="deliveryPoliceStation" required placeholder="থানা" value="${escapeHtml(getSavedDeliveryProfile().policeStation||'')}"></label>
+ <label>জেলা<input id="deliveryDistrict" required placeholder="জেলা" value="${escapeHtml(getSavedDeliveryProfile().district||'')}"></label>
+ <label>PIN কোড<input id="deliveryPin" inputmode="numeric" type="text" required pattern="[0-9]{6}" maxlength="6" placeholder="৬ সংখ্যার PIN কোড" value="${escapeHtml(getSavedDeliveryProfile().pin||'')}"></label>
+ <input type="hidden" id="customerAddress">
  <div class="location-picker-wrap"><div class="location-picker-head"><b>📍 ম্যাপে ডেলিভারি লোকেশন বেছে নিন</b><small>ম্যাপে ট্যাপ করুন অথবা মার্কার টেনে সঠিক বাড়ির জায়গায় রাখুন।</small></div><div id="deliveryMap" class="delivery-map" role="application" aria-label="ডেলিভারি লোকেশন ম্যাপ"></div><div class="location-picker-actions"><button type="button" id="useMyLocation" class="btn btn-light">◎ আমার বর্তমান লোকেশন</button><span id="locationStatus" class="location-status">ম্যাপে লোকেশন বেছে নেওয়া হয়নি</span></div><input type="hidden" id="deliveryLat"><input type="hidden" id="deliveryLng"></div>
- <label>ডেলিভারি নির্দেশ (ঐচ্ছিক)<input id="deliveryNote" placeholder="যেমন: বাড়ির সামনে ফোন করবেন"></label>
+ <label>ডেলিভারি নির্দেশ / কাছের পরিচিত স্থান (ঐচ্ছিক)<input id="deliveryNote" placeholder="যেমন: মসজিদের পাশে, বাড়ির সামনে ফোন করবেন" value="${escapeHtml(getSavedDeliveryProfile().note||'')}"></label>
  ${storeSettings.enableCOD!==false?`<label class="payment-option"><input type="radio" name="payment" value="cod" ${storeSettings.enableCOD!==false?'checked':''}> <span><b>Cash on Delivery</b><br><small>পণ্য পাওয়ার সময় পেমেন্ট</small></span></label>`:''}
  ${storeSettings.enableUPI!==false?`<label class="payment-option"><input type="radio" name="payment" value="upi_intent" ${storeSettings.enableCOD===false?'checked':''}> <span><b>Pay by any UPI App</b><br><small>অর্ডার কনফার্ম করার পর UPI অ্যাপ খুলতে পারবেন</small></span></label>`:''}
  ${storeSettings.enableCOD===false&&storeSettings.enableUPI===false?'<p class="warning">এই মুহূর্তে কোনো পেমেন্ট পদ্ধতি চালু নেই। দোকানের সঙ্গে যোগাযোগ করুন।</p>':''}
@@ -224,6 +232,8 @@ function checkoutForm(){
   if(!configReady){err.textContent='Firebase config সেট করা হয়নি।';return}
   const selectedPayment=document.querySelector('input[name="payment"]:checked');if(!selectedPayment){err.textContent='দোকানদার এখনো কোনো পেমেন্ট পদ্ধতি চালু করেননি।';return}const payment=selectedPayment.value;
   const lines=cartLines(),subtotal=lines.reduce((s,x)=>s+x.p.price*x.qty,0),discount=couponDiscountFor(subtotal),total=Math.max(0,subtotal-discount);
+  const deliveryProfile={name:$('customerName').value.trim(),phone:$('customerPhone').value.trim(),village:$('deliveryVillage').value.trim(),postOffice:$('deliveryPostOffice').value.trim(),policeStation:$('deliveryPoliceStation').value.trim(),district:$('deliveryDistrict').value.trim(),pin:$('deliveryPin').value.trim(),note:$('deliveryNote').value.trim(),lat:$('deliveryLat').value?Number($('deliveryLat').value):null,lng:$('deliveryLng').value?Number($('deliveryLng').value):null};
+  $('customerAddress').value=[deliveryProfile.village,`পোস্ট অফিস: ${deliveryProfile.postOffice}`,`থানা: ${deliveryProfile.policeStation}`,`জেলা: ${deliveryProfile.district}`,`PIN: ${deliveryProfile.pin}`].join(', ');
   const order={createdAt:serverTimestamp(),userId:currentUser.uid,email:currentUser.email||'',customerName:$('customerName').value.trim(),phone:$('customerPhone').value.trim(),address:$('customerAddress').value.trim(),note:$('deliveryNote').value.trim(),deliveryLocation:($('deliveryLat').value&&$('deliveryLng').value)?{lat:Number($('deliveryLat').value),lng:Number($('deliveryLng').value),mapUrl:`https://www.google.com/maps?q=${$('deliveryLat').value},${$('deliveryLng').value}`} : null,items:lines.map(x=>({productId:x.p.id||x.id.split('::')[0],name:x.p.name,unit:x.p.variantLabel||x.p.unit||'',price:x.p.price,quantity:x.qty,variantKey:x.p.variantKey||''})),subtotal,discount,couponCode:discount>0?(appliedCoupon?.code||''):'',deliveryFee:null,total,status:'pending',paymentMethod:payment,paymentStatus:payment==='upi_intent'?'pending_verification':'pending',paymentReference:'',customerConfirmed:true,customerConfirmedAt:null};
   openModal(`<span class="eyebrow">FINAL ORDER REVIEW</span><h2 id="modalTitle">অর্ডার ও বিল যাচাই করুন</h2><p>এখনও কোনো অর্ডার Admin-এর কাছে পাঠানো হয়নি। নিচের <b>চূড়ান্ত অর্ডার কনফার্ম</b> বাটনে চাপলেই অর্ডার তৈরি হবে এবং কার্ট খালি হবে। ফিরে গেলে পণ্য কার্টেই থাকবে।</p>${makeBengaliBill('কনফার্মের পর তৈরি হবে',order)}<button id="printBillPreviewBtn" class="btn btn-light full" type="button">🧾 বিল প্রিভিউ প্রিন্ট</button><button id="finalConfirmOrderBtn" class="btn btn-primary full" type="button">✓ চূড়ান্ত অর্ডার কনফার্ম করুন</button><button id="backToCheckoutBtn" class="btn btn-light full" type="button">ফিরে যান · কার্ট থাকবে</button><div id="finalConfirmError" class="error-text" aria-live="polite"></div>`);
   $('printBillPreviewBtn').onclick=printBengaliBill;
@@ -233,6 +243,7 @@ function checkoutForm(){
    try{
     order.customerConfirmedAt=serverTimestamp();
     const orderRef=await addDoc(collection(db,'orders'),order);
+    saveDeliveryProfile(deliveryProfile);
     cart={};cartProductCache={};saveCart();closeModal();
     if(payment==='upi_intent'){
      const billHtml=makeBengaliBill(orderRef.id,order);
@@ -430,7 +441,12 @@ async function initDeliveryMap(){
       maxZoom:19, attribution:'&copy; OpenStreetMap contributors',
       crossOrigin:true
     }).addTo(deliveryMapInstance);
-    deliveryMapMarker=window.L.marker([23.5204,87.3119],{draggable:true}).addTo(deliveryMapInstance);
+    const savedProfile=getSavedDeliveryProfile();
+    const hasSavedPoint=Number.isFinite(Number(savedProfile.lat))&&Number.isFinite(Number(savedProfile.lng))&&savedProfile.lat!==null&&savedProfile.lng!==null;
+    const initialPoint=hasSavedPoint?[Number(savedProfile.lat),Number(savedProfile.lng)]:[23.5204,87.3119];
+    deliveryMapInstance.setView(initialPoint,hasSavedPoint?16:12);
+    deliveryMapMarker=window.L.marker(initialPoint,{draggable:true}).addTo(deliveryMapInstance);
+    if(hasSavedPoint)setDeliveryLocation(initialPoint[0],initialPoint[1]);
     deliveryMapMarker.bindPopup('মার্কার টেনে আপনার ডেলিভারি লোকেশন বেছে নিন');
     deliveryMapInstance.on('click',e=>setDeliveryLocation(e.latlng.lat,e.latlng.lng));
     deliveryMapMarker.on('dragend',()=>{const point=deliveryMapMarker.getLatLng();setDeliveryLocation(point.lat,point.lng)});
