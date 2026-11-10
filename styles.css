@@ -373,3 +373,5 @@ body:has(#modalBackdrop:not([hidden])) .sticky-cart-bar{display:none!important}
 .coupon-admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .coupon-admin-actions button{flex:1}
 @media(max-width:620px){.coupon-box{padding:9px}.coupon-entry input{font-size:12px}.cart-payable-line{font-size:15px}}
+
+.footer-contact{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink)}.footer-contact a{color:#16803c;font-weight:700}.footer-contact a:hover{text-decoration:underline}
