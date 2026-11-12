@@ -375,3 +375,15 @@ body:has(#modalBackdrop:not([hidden])) .sticky-cart-bar{display:none!important}
 @media(max-width:620px){.coupon-box{padding:9px}.coupon-entry input{font-size:12px}.cart-payable-line{font-size:15px}}
 
 .footer-contact{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink)}.footer-contact a{color:#16803c;font-weight:700}.footer-contact a:hover{text-decoration:underline}
+
+/* Saved address and collapsible delivery map */
+.map-accordion{border:1px solid var(--border,#dce5dd);border-radius:14px;overflow:hidden;padding:0;background:var(--surface,#fff)}
+.map-accordion-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;padding:14px;margin:0}
+.map-accordion-summary::-webkit-details-marker{display:none}
+.map-accordion-summary small{display:block;margin-top:4px;color:var(--muted,#66756b)}
+.map-chevron{font-size:25px;line-height:1;transition:transform .2s ease}
+.map-accordion[open] .map-chevron{transform:rotate(180deg)}
+.map-accordion .delivery-map{margin:0 12px 12px}
+.map-accordion .location-picker-actions{padding:0 12px 12px}
+.saved-address-summary{margin:0 0 12px;padding:13px;border:1px solid var(--border,#dce5dd);border-radius:12px}
+.saved-address-summary p{line-height:1.7;margin:7px 0}
