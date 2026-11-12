@@ -387,3 +387,12 @@ body:has(#modalBackdrop:not([hidden])) .sticky-cart-bar{display:none!important}
 .map-accordion .location-picker-actions{padding:0 12px 12px}
 .saved-address-summary{margin:0 0 12px;padding:13px;border:1px solid var(--border,#dce5dd);border-radius:12px}
 .saved-address-summary p{line-height:1.7;margin:7px 0}
+
+/* Product ordering and search keyword controls */
+.product-order-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 16px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#f8fff9}
+.product-order-toolbar small{color:var(--muted);font-size:12px;flex-basis:100%}
+.admin-product-order{display:flex;gap:4px;align-items:center;margin-left:auto}
+.tiny-order-btn{width:28px;height:28px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--green-dark);font-weight:800;cursor:pointer}
+.tiny-order-btn:hover{background:var(--mint)}
+.admin-product-summary-side{display:flex;align-items:center;gap:8px}
+@media(max-width:600px){.product-order-toolbar{align-items:stretch}.product-order-toolbar .small-btn{flex:1}.admin-product-summary-side{gap:4px}.tiny-order-btn{width:25px;height:25px}}

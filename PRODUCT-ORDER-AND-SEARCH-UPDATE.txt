@@ -1,0 +1,18 @@
+ASIK STORE — Product Reordering & Smarter Search
+
+Changes:
+1. Admin > Products includes Shuffle Products, Save Display Order, and ↑/↓ controls.
+2. Product display order is saved in Firestore as `sortOrder`; the storefront uses that order in default sorting.
+3. Add/Edit Product includes `Search Keywords / বিকল্প নাম`. Enter Bengali, English, common spellings, or transliterations separated by commas (example: চাল, চাউল, Rice).
+4. Search checks product name, category and saved keywords, with conservative typo tolerance. It does not search long descriptions, reducing unrelated results.
+
+How to use:
+- Open Admin Panel > Products.
+- Use ↑/↓ to move products or Shuffle Products to randomize.
+- Click Save Display Order to persist the order.
+- When adding/editing products, add relevant Bengali/English aliases in Search Keywords.
+
+Notes:
+- Products created before this update without keywords can still be searched by their saved product name/category. Add aliases by editing those products.
+- Firestore rules must allow the signed-in admin to update product documents.
+- Search runs in the browser over products already loaded from Firestore.
